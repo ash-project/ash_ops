@@ -1,6 +1,6 @@
 # AshMix
 
-**TODO: Add description**
+Experimental extension which exposes ash actions as mix tasks.
 
 ## Installation
 
@@ -18,4 +18,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/ash_mix>.
-

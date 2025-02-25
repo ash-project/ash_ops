@@ -12,23 +12,44 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
-        :resource,
-        :code_interface,
         :actions,
-        :policies,
-        :pub_sub,
-        :preparations,
-        :changes,
-        :validations,
-        :multitenancy,
-        :attributes,
-        :relationships,
-        :calculations,
         :aggregates,
-        :identities
+        :attributes,
+        :calculations,
+        :changes,
+        :code_interface,
+        :identities,
+        :multitenancy,
+        :policies,
+        :postgres,
+        :preparations,
+        :pub_sub,
+        :relationships,
+        :resource,
+        :validations
       ]
     ],
-    "Ash.Domain": [section_order: [:resources, :policies, :authorization, :domain, :execution]]
+    "Ash.Domain": [
+      section_order: [
+        :authorization,
+        :domain,
+        :execution,
+        :mix_tasks,
+        :policies,
+        :resources
+      ]
+    ]
   ]
+
+if Mix.env() in [:dev, :test] do
+  config :git_ops,
+    mix_project: Mix.Project.get!(),
+    types: [types: [tidbit: [hidden?: true], important: [header: "Important Changes"]]],
+    version_tag_prefix: "v",
+    manage_mix_verions?: true,
+    manage_readme_version: true
+
+  config :ash_mix, ash_domains: [Example]
+end
 
 import_config "#{config_env()}.exs"
