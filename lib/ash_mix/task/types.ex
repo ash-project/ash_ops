@@ -80,7 +80,8 @@ defmodule AshMix.Task.Types do
     end
   end
 
-  def arguments(input, _task, _extras), do: {:error, "Invalid arguments `#{inspect(input)}`"}
+  def positional_arguments(input, _task, _before_args, _after_args),
+    do: {:error, "Invalid arguments `#{inspect(input)}`"}
 
   @doc "Custom option type for format"
   @spec format(any) :: {:ok, :json | :yaml} | {:error, any}

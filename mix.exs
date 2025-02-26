@@ -44,8 +44,8 @@ defmodule AshMix.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "LICENSE.md"],
-      filter_modules: ~r/^AshMix\./
+      extras: ["README.md", "CHANGELOG.md", "LICENSE.md"],
+      filter_modules: ~r/^Elixir\.AshMix\./
     ]
   end
 
