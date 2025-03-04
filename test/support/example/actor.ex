@@ -12,4 +12,9 @@ defmodule Example.Actor do
     uuid_v7_primary_key :id
     attribute :is_good, :boolean, allow_nil?: false, public?: true
   end
+
+  ets do
+    table :actor
+    private? true
+  end
 end

@@ -1,5 +1,5 @@
-defmodule AshMixTest do
+defmodule AshOpsTest do
   @moduledoc false
   use ExUnit.Case
-  doctest AshMix
+  doctest AshOps
 end

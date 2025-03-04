@@ -1,17 +1,19 @@
-defmodule AshMix.Domain.Entity.Get do
+defmodule AshOps.Entity.List do
   @moduledoc """
-  The `mix_tasks.get` DSL entity.
+  The `mix_tasks.list` DSL entity.
   """
 
   defstruct [
     :__identifier__,
     :action,
-    :arguments,
     :description,
     :domain,
     :name,
     :prefix,
-    :resource
+    :resource,
+    :task_name,
+    arguments: [],
+    type: :list
   ]
 
   @type t :: %__MODULE__{
@@ -22,33 +24,32 @@ defmodule AshMix.Domain.Entity.Get do
           domain: module,
           name: atom,
           prefix: atom,
-          resource: module
+          resource: module,
+          task_name: atom,
+          type: :list
         }
 
   @doc false
   def __entity__ do
     %Spark.Dsl.Entity{
-      name: :get,
+      name: :list,
       describe: """
-      Generate a mix task which calls a read action and returns a single record
-      by primary key or identity.
+      Generate a mix task which calls a read action and returns any matching records.
 
       ## Example
 
-      Defining the following`get` in your domain:
+      Define the following `list` in your domain:application
 
       ```elixir
       mix_tasks do
-        get Post, :get_post, :read
+        list Post, :list_posts, :read
       end
       ```
 
-      Will result in the following mix task being available:
+      Will result in the following mix task being available:application
 
-      ```
-      mix my_app.blog.get_post "01953abc-c4e9-7661-a79a-243b0d982ab7"
-      title: Example blog post
-      body: This is the example blog post
+      ```bash
+      mix my_app.blog.list_posts
       ```
       """,
       target: __MODULE__,
@@ -63,9 +64,8 @@ defmodule AshMix.Domain.Entity.Get do
         arguments: [
           type: {:wrap_list, :atom},
           required: false,
-          default: [],
           doc:
-            "A list of action arguments can be taken as positional arguments on the command line"
+            "A comma-separated list of action arguments can be taken as positional arguments on the command line"
         ],
         description: [
           type: :string,

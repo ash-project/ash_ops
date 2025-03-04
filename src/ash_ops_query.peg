@@ -1,0 +1,88 @@
+query <- expr;
+
+expr <- lhs:expr_single rhs:(space? op space? expr_single)*
+`
+  Lhs = proplists:get_value(lhs, Node),
+  Rhs = proplists:get_value(rhs, Node),
+  Rhs2 = lists:flatmap(fun([_, Op, _, E]) -> [Op, E] end, Rhs),
+  [Lhs | Rhs2]
+`;
+expr_single <- array / braced / function / literal / path;
+braced <- '(' space? e:expr space? ')'
+  `
+    proplists:get_value(e, Node)
+  `;
+
+function <- name:ident '(' space? args:function_args? space? ')'
+  `
+  Name = proplists:get_value(name, Node),
+  Args = proplists:get_value(args, Node),
+  {function, Name, Args}
+  `;
+
+function_args <- head:(expr space? "," space?)* tail:expr
+  `
+  Head = lists:flatmap(fun([E, _, _, _]) -> E end, proplists:get_value(head, Node)),
+  Tail = proplists:get_value(tail, Node),
+  lists:append(Head, Tail)
+  `;
+
+
+op <- op_and / op_or / op_eq / op_neq / op_concat / op_gte / op_gt / op_lte / op_lt / op_in / op_mul / op_div / op_add / op_sub;
+op_mul <- '*' / 'times' `{op, '*', left, 8}`;
+op_div <- '/' / 'div' `{op, '/', left, 8}`;
+op_add <- '+' / 'plus' `{op, '+', left, 7}`;
+op_sub <- '-' / 'minus' `{op, '-', left, 7}`;
+op_concat <- '<>' / 'concat' `{op, '<>', right, 6}`;
+op_in <- 'in' `{op, in, left, 5}`;
+op_gt <- '>' / 'gt' / 'greater_than' `{op, '>', left, 4}`;
+op_gte <- '>=' / 'gte' / 'greater_than_or_equal' `{op, '>=', left, 4}`;
+op_lt <- '<' / 'lt' / 'less_than' `{op, '<', left, 4}`;
+op_lte <- '<=' / 'lte' / 'less_than_or_equal' `{op, '<=', left, 4}`;
+op_eq <- '==' / 'eq' / 'equals' `{op, '==', left, 3}`;
+op_neq <- '!=' / 'not_eq' / 'not_equals' `{op, '!=', left, 3}`;
+op_and <- '&&' / 'and' `{op, '&&', left, 2}`;
+op_or <- '||' / 'or' `{op, '||', left, 1}`;
+
+path <- head:ident tail:('.' path_element)*
+  `
+    Head = proplists:get_value(head, Node),
+    Tail = lists:map(fun([_, E]) -> E end, proplists:get_value(tail, Node)),
+    {path, [Head | Tail]}
+  `;
+
+path_element <- ident;
+
+array <- '[' space? elements:array_elements? space? ']'
+  `
+    proplists:get_value(elements, Node)
+  `;
+
+array_elements <- head:(expr space? "," space?)* tail:expr
+  `
+   Head = lists:flatmap(fun([E, _, _, _]) -> E end, proplists:get_value(head, Node)),
+   Tail = proplists:get_value(tail, Node),
+   {array, lists:append(Head, Tail)}
+  `;
+
+literal <- boolean / float / integer / string;
+boolean <- boolean_true / boolean_false;
+boolean_true <- 'true' `{boolean, true}`;
+boolean_false <- 'false' `{boolean, false}`;
+integer <- '-'? ('0' / ([1-9] [0-9]*))
+  `
+    Number = iolist_to_binary(Node),
+    {integer, binary_to_integer(Number)}
+  `;
+float <- '-'? ([0-9]+ '.' [0-9]+)
+  `
+    Number = iolist_to_binary(Node),
+    {float, binary_to_float(Number)}
+  `;
+
+string <- string_double / string_single;
+string_double <- '"' chars:(!'"' ("\\\\" / '\\"' / .))* '"' `{string, iolist_to_binary(proplists:get_value(chars, Node))}`;
+string_single <- "'" chars:(!"'" ("\\\\" / "\\'" / .))* "'" `{string, iolist_to_binary(proplists:get_value(chars, Node))}`;
+
+ident <- [a-zA-Z_] [a-zA-Z0-9_]* `{ident, iolist_to_binary(Node)}`;
+space <- [ \t\n\s\r]* ~;

@@ -1,9 +1,10 @@
 defmodule Example do
   @moduledoc false
-  use Ash.Domain, otp_app: :ash_mix, extensions: [AshMix.Domain]
+  use Ash.Domain, otp_app: :ash_ops, extensions: [AshOps]
 
   mix_tasks do
     get __MODULE__.Post, :get_post, :read
+    list __MODULE__.Post, :list_posts, :read
   end
 
   resources do

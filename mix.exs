@@ -1,4 +1,4 @@
-defmodule AshMix.MixProject do
+defmodule AshOps.MixProject do
   use Mix.Project
 
   @moduledoc "An Ash extension which generates mix tasks for Ash actions"
@@ -6,7 +6,8 @@ defmodule AshMix.MixProject do
   def project do
     [
       aliases: aliases(),
-      app: :ash_mix,
+      app: :ash_ops,
+      compilers: compilers(Mix.env()),
       consolidate_protocols: Mix.env() != :dev,
       deps: deps(),
       description: @moduledoc,
@@ -27,11 +28,11 @@ defmodule AshMix.MixProject do
       ],
       licenses: ["MIT"],
       links: %{
-        "Source" => "https://github.com/ash-project/ash_mix",
+        "Source" => "https://github.com/ash-project/ash_ops",
         "Ash" => "https://www.ash-hq.org/"
       },
-      source_url: "https://github.com/ash-project/ash_mix",
-      files: ~w[lib .formatter.exs mix.exs README* LICENSE* CHANGELOG* documentation]
+      source_url: "https://github.com/ash-project/ash_ops",
+      files: ~w[lib src .formatter.exs mix.exs README* LICENSE* CHANGELOG* documentation]
     ]
   end
 
@@ -45,7 +46,7 @@ defmodule AshMix.MixProject do
     [
       main: "readme",
       extras: ["README.md", "CHANGELOG.md", "LICENSE.md"],
-      filter_modules: ~r/^Elixir\.AshMix\./
+      filter_modules: ~r/^Elixir\.AshOps\./
     ]
   end
 
@@ -65,6 +66,7 @@ defmodule AshMix.MixProject do
       {:faker, "~> 0.18", only: [:dev, :test]},
       {:git_ops, "~> 2.0", only: [:dev, :test], runtime: false},
       {:igniter, "~> 0.5", only: [:dev, :test], optional: true},
+      {:neotoma_compiler, "~> 0.1", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:simple_sat, "~> 0.1", only: [:dev, :test]},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
@@ -74,12 +76,15 @@ defmodule AshMix.MixProject do
 
   defp aliases do
     [
-      "spark.formatter": "spark.formatter --extensions AshMix.Domain",
-      "spark.cheat_sheets": "spark.cheat_sheets --extensions AshMix.Domain",
+      "spark.formatter": "spark.formatter --extensions AshOps",
+      "spark.cheat_sheets": "spark.cheat_sheets --extensions AshOps",
       docs: ["spark.cheat_sheets", "docs"]
     ]
   end
 
   defp elixirc_paths(env) when env in [:dev, :test], do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp compilers(env) when env in ~w[dev test]a, do: [:neotoma | Mix.compilers()]
+  defp compilers(_env), do: Mix.compilers()
 end

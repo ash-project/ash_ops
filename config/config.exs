@@ -18,6 +18,7 @@ config :spark,
         :calculations,
         :changes,
         :code_interface,
+        :ets,
         :identities,
         :multitenancy,
         :policies,
@@ -49,7 +50,7 @@ if Mix.env() in [:dev, :test] do
     manage_mix_verions?: true,
     manage_readme_version: true
 
-  config :ash_mix, ash_domains: [Example]
+  config :ash_ops, ash_domains: [Example]
 end
 
 import_config "#{config_env()}.exs"

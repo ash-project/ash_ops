@@ -1,4 +1,4 @@
-defmodule AshMix.Task.ArgSchema do
+defmodule AshOps.Task.ArgSchema do
   @moduledoc """
   A struct which contains information about the arguments a task expects to
   receive.
@@ -14,40 +14,38 @@ defmodule AshMix.Task.ArgSchema do
   @doc """
   Return the default arguments that all tasks expect to take.
   """
-  @spec default(AshMix.Domain.entity()) :: t
+  @spec default(AshOps.entity()) :: t
   def default(task) do
     %__MODULE__{
       op_schema: [
         aliases: [
           a: :actor,
           f: :format,
-          i: :identity,
           l: :load,
           t: :tenant
         ],
         strict: [
           actor: :string,
           format: :string,
-          identity: :string,
           load: :string,
           tenant: :string
         ]
       ],
       so_schema: [
         actor: [
-          type: {:custom, AshMix.Task.Types, :actor, [task]},
+          type: {:custom, AshOps.Task.Types, :actor, [task]},
           required: false,
           doc:
             "Specify the actor to use for the request in the format `resource:id`, eg: `Example.Accounts.User:abc123`."
         ],
         format: [
-          type: {:custom, AshMix.Task.Types, :format, []},
+          type: {:custom, AshOps.Task.Types, :format, []},
           required: false,
           default: "yaml",
           doc: "The output format to display the result in. Either `json` or `yaml`."
         ],
         load: [
-          type: {:custom, AshMix.Task.Types, :load, [task]},
+          type: {:custom, AshOps.Task.Types, :load, [task]},
           required: false,
           doc:
             "An optional load query as a comma separated list of fields, fields can be nested with dots."
@@ -58,7 +56,7 @@ defmodule AshMix.Task.ArgSchema do
           doc: "Specify a tenant to use when executing the query."
         ],
         positional_arguments: [
-          type: {:custom, AshMix.Task.Types, :positional_arguments, [task, [], []]},
+          type: {:custom, AshOps.Task.Types, :positional_arguments, [task, [], []]},
           required: true
         ]
       ]
@@ -157,10 +155,10 @@ defmodule AshMix.Task.ArgSchema do
       |> Keyword.update!(:positional_arguments, fn positional_arguments ->
         positional_arguments
         # credo:disable-for-next-line Credo.Check.Refactor.Nesting
-        |> Keyword.update!(:type, fn {:custom, AshMix.Task.Types, :positional_arguments,
+        |> Keyword.update!(:type, fn {:custom, AshOps.Task.Types, :positional_arguments,
                                       [task, before_args, after_args]} ->
           {before_args, after_args} = updater.(before_args, after_args)
-          {:custom, AshMix.Task.Types, :positional_arguments, [task, before_args, after_args]}
+          {:custom, AshOps.Task.Types, :positional_arguments, [task, before_args, after_args]}
         end)
       end)
     end)
@@ -180,23 +178,50 @@ defmodule AshMix.Task.ArgSchema do
   @doc """
   Display usage information about the arguments
   """
-  @spec usage(AshMix.Domain.entity(), t) :: String.t()
+  @spec usage(AshOps.entity(), t) :: String.t()
   def usage(task, arg_schema) do
-    """
-    ## Example
+    [
+      """
+      ## Example
 
-    ```bash
-    #{example_usage(task, arg_schema)}
-    ```
+      ```bash
+      #{example_usage(task, arg_schema)}
+      ```
+      """,
+      if has_positional_args?(arg_schema) do
+        """
 
-    ## Command line arguments
+        ## Command line arguments
 
-    #{positional_argument_usage(arg_schema)}
+        #{positional_argument_usage(arg_schema)}
+        """
+      end,
+      if has_switches?(arg_schema) do
+        """
 
-    ## Command line options
+        ## Command line options
 
-    #{switch_usage(arg_schema)}
-    """
+        #{switch_usage(arg_schema)}
+        """
+      end
+    ]
+    |> Enum.map_join("\n", &to_string/1)
+  end
+
+  defp has_positional_args?(arg_schema) do
+    arg_schema.so_schema
+    |> Keyword.get(:positional_arguments, [])
+    |> Keyword.get(:type, {:custom, AshOps.Task.Types, :positional_arguments, [nil, [], []]})
+    |> elem(3)
+    |> Enum.drop(1)
+    |> Enum.concat()
+    |> Enum.any?()
+  end
+
+  defp has_switches?(arg_schema) do
+    arg_schema.so_schema
+    |> Keyword.delete(:positional_arguments)
+    |> Enum.any?()
   end
 
   defp example_usage(task, arg_schema) do
@@ -220,7 +245,7 @@ defmodule AshMix.Task.ArgSchema do
   end
 
   defp extract_positional_args(arg_schema) do
-    {:custom, AshMix.Task.Types, :positional_arguments, [task, before_args, after_args]} =
+    {:custom, AshOps.Task.Types, :positional_arguments, [task, before_args, after_args]} =
       arg_schema
       |> Map.fetch!(:so_schema)
       |> Keyword.fetch!(:positional_arguments)

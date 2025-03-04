@@ -1,12 +1,13 @@
-defmodule AshMix.Task.Get do
+defmodule AshOps.Task.Get do
   @moduledoc """
   Provides the implementation of the `get` mix task.
 
   This should only ever be called from the mix task itself.
   """
   alias Ash.{Query, Resource.Info}
-  alias AshMix.Task.ArgSchema
+  alias AshOps.Task.ArgSchema
 
+  import AshOps.Task.Read
   require Query
 
   @doc false
@@ -101,32 +102,6 @@ defmodule AshMix.Task.Get do
     end
   end
 
-  defp handle_error({:error, reason}) when is_exception(reason) do
-    reason
-    |> Exception.message()
-    |> Mix.shell().error()
-  end
-
-  defp handle_error({:error, reason}) when is_binary(reason) do
-    reason
-    |> Mix.shell().error()
-  end
-
-  defp handle_error({:error, reason}) do
-    reason
-    |> inspect()
-    |> Mix.shell().error()
-  end
-
-  defp load_actor(nil, _), do: {:ok, nil}
-
-  defp load_actor({resource, filter}, tenant) do
-    resource
-    |> Query.new()
-    |> Query.filter_input(filter)
-    |> Ash.read_one(authorize?: false, tenant: tenant)
-  end
-
   @doc false
   defmacro __using__(opts) do
     quote generated: true do
@@ -137,7 +112,7 @@ defmodule AshMix.Task.Get do
                   |> ArgSchema.add_switch(
                     :identity,
                     :string,
-                    {:custom, AshMix.Task.Types, :identity, [@task]},
+                    {:custom, AshOps.Task.Types, :identity, [@task]},
                     "The identity to use to retrieve the record.",
                     [:i]
                   )
@@ -146,6 +121,10 @@ defmodule AshMix.Task.Get do
 
       @moduledoc """
       #{@shortdoc}
+
+      Records are looked up by their primary key unless the `--identity` option
+      is used.  Said identity must not be composite (ie only contain a single
+      field).
 
       #{if @task.action.description, do: "#{@task.action.description}\n\n"}
       #{ArgSchema.usage(@task, @arg_schema)}

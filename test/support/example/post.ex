@@ -21,6 +21,12 @@ defmodule Example.Post do
 
   calculations do
     calculate :length, :integer, expr(string_length(body)), public?: true
+    calculate :long, :boolean, expr(length > 10), public?: true
+  end
+
+  ets do
+    table :posts
+    private? true
   end
 
   identities do

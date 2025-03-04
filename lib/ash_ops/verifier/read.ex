@@ -1,18 +1,18 @@
-defmodule AshMix.Domain.Verifier.Get do
+defmodule AshOps.Verifier.Read do
   @moduledoc """
-  A Spark DSL verifier for the `get` entity.
+  A Spark DSL verifier for read entities.
   """
   use Spark.Dsl.Verifier
   import Spark.Dsl.Verifier
 
-  alias AshMix.Domain.Info, as: AMI
+  alias AshOps.Info, as: AOI
   alias Spark.Error.DslError
 
   @doc false
   def verify(dsl) do
     dsl
-    |> AMI.mix_tasks()
-    |> Enum.filter(&is_struct(&1, AshMix.Domain.Entity.Get))
+    |> AOI.mix_tasks()
+    |> Enum.filter(&(is_struct(&1, AshOps.Entity.Get) || is_struct(&1, AshOps.Entity.List)))
     |> Enum.reduce_while(:ok, fn get, :ok ->
       case verify_entity(get, dsl) do
         :ok -> {:cont, :ok}

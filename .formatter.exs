@@ -1,4 +1,12 @@
-spark_locals_without_parens = [arguments: 1, description: 1, get: 3, get: 4, prefix: 1]
+spark_locals_without_parens = [
+  arguments: 1,
+  description: 1,
+  get: 3,
+  get: 4,
+  list: 3,
+  list: 4,
+  prefix: 1
+]
 
 [
   inputs: ["{mix,.formatter}.exs", "{config,lib,test}/**/*.{ex,exs}"],
