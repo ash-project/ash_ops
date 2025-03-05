@@ -12,6 +12,7 @@ defmodule AshOps do
     examples: [
       """
       mix_tasks do
+        action Post, :publish_post, :publish
         create Post, :create_post, :create
         destroy Post, :destroy_post, :destroy
         get Post, :get_post, :read
@@ -21,6 +22,7 @@ defmodule AshOps do
       """
     ],
     entities: [
+      __MODULE__.Entity.Action.__entity__(),
       __MODULE__.Entity.Create.__entity__(),
       __MODULE__.Entity.Destroy.__entity__(),
       __MODULE__.Entity.Get.__entity__(),
@@ -35,7 +37,10 @@ defmodule AshOps do
     verifiers: [__MODULE__.Verifier.VerifyTask]
 
   @type entity ::
-          __MODULE__.Entity.Create.t()
+          __MODULE__.Entity.Action.t()
+          | __MODULE__.Entity.Create.t()
+          | __MODULE__.Entity.Destroy.t()
           | __MODULE__.Entity.Get.t()
           | __MODULE__.Entity.List.t()
+          | __MODULE__.Entity.Update.t()
 end

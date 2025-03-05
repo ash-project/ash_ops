@@ -7,6 +7,12 @@ defmodule Example.Post do
 
   actions do
     defaults [:read, :destroy, create: :*, update: :*]
+
+    action :publish, :boolean do
+      argument :id, :uuid, public?: true, allow_nil?: false
+      argument :platform, :string, public?: true, allow_nil?: false
+      run fn _, _ -> {:ok, true} end
+    end
   end
 
   attributes do

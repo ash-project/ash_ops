@@ -3,6 +3,7 @@ defmodule Example do
   use Ash.Domain, otp_app: :ash_ops, extensions: [AshOps]
 
   mix_tasks do
+    action __MODULE__.Post, :publish_post, :publish, arguments: [:id, :platform]
     get __MODULE__.Post, :get_post, :read
     list __MODULE__.Post, :list_posts, :read
     create __MODULE__.Post, :create_post, :create

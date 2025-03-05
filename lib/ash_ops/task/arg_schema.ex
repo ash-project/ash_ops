@@ -251,10 +251,13 @@ defmodule AshOps.Task.ArgSchema do
     mid_args =
       task.arguments
       |> Enum.map(fn arg ->
-        task.action.arguments
-        |> Enum.find_value("Argument to the `#{task.action.name}` action", fn action_arg ->
-          action_arg.name == arg && action_arg.description
-        end)
+        description =
+          task.action.arguments
+          |> Enum.find_value("Argument to the `#{task.action.name}` action", fn action_arg ->
+            action_arg.name == arg && action_arg.description
+          end)
+
+        {arg, description}
       end)
 
     before_args

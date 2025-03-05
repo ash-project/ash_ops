@@ -12,6 +12,7 @@ Resource actions to expose as mix tasks.
 
 
 ### Nested DSLs
+ * [action](#mix_tasks-action)
  * [create](#mix_tasks-create)
  * [destroy](#mix_tasks-destroy)
  * [get](#mix_tasks-get)
@@ -22,6 +23,7 @@ Resource actions to expose as mix tasks.
 ### Examples
 ```
 mix_tasks do
+  action Post, :publish_post, :publish
   create Post, :create_post, :create
   destroy Post, :destroy_post, :destroy
   get Post, :get_post, :read
@@ -33,6 +35,59 @@ end
 
 
 
+
+### mix_tasks.action
+```elixir
+action resource, name, action
+```
+
+
+Generate a mix task which calls a generic action and returns the created
+record.
+
+#### Example
+
+Defining the following `action` in your domain:
+
+```elixir
+mix_tasks do
+action Post, :publish_post, :publish, arguments: [:id, :platform]
+end
+```
+
+Will result in the following mix task being available:
+
+```bash
+mix my_app.blog.publish_post <ID> <platform>
+```
+
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`resource`](#mix_tasks-action-resource){: #mix_tasks-action-resource .spark-required} | `module` |  | The resource whose actions to use |
+| [`name`](#mix_tasks-action-name){: #mix_tasks-action-name .spark-required} | `atom` |  | The name of the mix task to generate |
+| [`action`](#mix_tasks-action-action){: #mix_tasks-action-action .spark-required} | `atom` |  | The name of the action to use |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`arguments`](#mix_tasks-action-arguments){: #mix_tasks-action-arguments } | `atom \| list(atom)` | `[]` | A list of action arguments which should be taken as positional arguments on the command line |
+| [`description`](#mix_tasks-action-description){: #mix_tasks-action-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
+| [`prefix`](#mix_tasks-action-prefix){: #mix_tasks-action-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first "."). Defaults to the `otp_app` setting of the domain |
+
+
+
+
+
+### Introspection
+
+Target: `AshOps.Entity.Action`
 
 ### mix_tasks.create
 ```elixir
