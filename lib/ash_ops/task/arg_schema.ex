@@ -39,10 +39,11 @@ defmodule AshOps.Task.ArgSchema do
             "Specify the actor to use for the request in the format `resource:id`, eg: `Example.Accounts.User:abc123`."
         ],
         format: [
-          type: {:custom, AshOps.Task.Types, :format, []},
+          type: {:custom, AshOps.Task.Types, :atom, [[:json, :yaml]]},
           required: false,
           default: "yaml",
-          doc: "The output format to display the result in. Either `json` or `yaml`."
+          doc:
+            "The output format to display the result in. Either `json` or `yaml`.  Defaults to `:yaml`"
         ],
         load: [
           type: {:custom, AshOps.Task.Types, :load, [task]},
@@ -107,12 +108,12 @@ defmodule AshOps.Task.ArgSchema do
 
   - `name` the name of the switch - this will be dasherised by `OptionParser`.
   - `op_type` the type to cast the argument to (as per `OptionParser.parse/2`).
-  - `so_type` the `Spark.Options` type for to validate the resulting input.
+  - `so_schema` the `Spark.Options` schema fragment for to validate the resulting input.
   - `help_text` the text to display when asked to render usage information.
   - `aliases` a list of "short name" aliases for the switch.
   """
-  @spec add_switch(t, atom, atom, any, String.t(), [atom]) :: t
-  def add_switch(arg_schema, name, op_type, so_type, help_text, aliases \\ []) do
+  @spec add_switch(t, atom, atom, keyword(), [atom]) :: t
+  def add_switch(arg_schema, name, op_type, so_schema, aliases \\ []) do
     arg_schema
     |> Map.update!(:op_schema, fn schema ->
       schema
@@ -124,11 +125,7 @@ defmodule AshOps.Task.ArgSchema do
     end)
     |> Map.update!(:so_schema, fn schema ->
       schema
-      |> Keyword.put(name,
-        type: so_type,
-        required: false,
-        doc: help_text
-      )
+      |> Keyword.put(name, so_schema)
     end)
   end
 

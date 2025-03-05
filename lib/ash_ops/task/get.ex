@@ -7,7 +7,7 @@ defmodule AshOps.Task.Get do
   alias Ash.{Query, Resource.Info}
   alias AshOps.Task.ArgSchema
 
-  import AshOps.Task.Read
+  import AshOps.Task.Common
   require Query
 
   @doc false
@@ -15,59 +15,13 @@ defmodule AshOps.Task.Get do
     with {:ok, cfg} <- ArgSchema.parse(arg_schema, argv),
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
          {:ok, record} <- load_record(task, Map.put(cfg, :actor, actor)),
-         {:ok, record} <- filter_record(record, task, cfg) do
-      serialise_record(record, cfg.format || :yaml)
+         {:ok, output} <- serialise_record(record, task, cfg) do
+      Mix.shell().info(output)
 
       :ok
     else
       {:error, reason} -> handle_error({:error, reason})
     end
-  end
-
-  defp serialise_record(record, :yaml) do
-    record
-    |> Map.new(fn
-      {key, nil} -> {key, "nil"}
-      {key, value} -> {key, value}
-    end)
-    |> Ymlr.document!()
-    |> String.replace_leading("---\n", "")
-    |> Mix.shell().info()
-  end
-
-  defp serialise_record(record, :json) do
-    record
-    |> Jason.encode!(pretty: true)
-    |> Mix.shell().info()
-  end
-
-  defp filter_record(record, task, cfg) do
-    result =
-      task.resource
-      |> Info.public_fields()
-      |> Enum.map(& &1.name)
-      |> Enum.concat(cfg[:load] || [])
-      |> do_filter_record(record)
-
-    {:ok, result}
-  end
-
-  defp do_filter_record(fields, record, result \\ %{})
-  defp do_filter_record([], _record, result), do: result
-
-  defp do_filter_record([field | fields], record, result) when is_atom(field) do
-    case Map.fetch!(record, field) do
-      not_loaded when is_struct(not_loaded, Ash.NotLoaded) ->
-        do_filter_record(fields, record, result)
-
-      value ->
-        do_filter_record(fields, record, Map.put(result, field, value))
-    end
-  end
-
-  defp do_filter_record([{field, children} | fields], record, result) when is_list(children) do
-    value = do_filter_record(children, Map.fetch!(record, field))
-    do_filter_record(fields, record, Map.put(result, field, value))
   end
 
   defp load_record(task, cfg) do
@@ -112,8 +66,11 @@ defmodule AshOps.Task.Get do
                   |> ArgSchema.add_switch(
                     :identity,
                     :string,
-                    {:custom, AshOps.Task.Types, :identity, [@task]},
-                    "The identity to use to retrieve the record.",
+                    [
+                      type: {:custom, AshOps.Task.Types, :identity, [@task]},
+                      required: false,
+                      doc: "The identity to use to retrieve the record."
+                    ],
                     [:i]
                   )
 
@@ -122,11 +79,19 @@ defmodule AshOps.Task.Get do
       @moduledoc """
       #{@shortdoc}
 
+      #{if @task.description, do: "#{@task.description}\n\n"}
+
+      #{if @task.action.description, do: """
+        ## Action
+
+        #{@task.action.description}
+
+        """}
+      ## Usage
+
       Records are looked up by their primary key unless the `--identity` option
       is used.  Said identity must not be composite (ie only contain a single
       field).
-
-      #{if @task.action.description, do: "#{@task.action.description}\n\n"}
       #{ArgSchema.usage(@task, @arg_schema)}
       """
       use Mix.Task

@@ -45,8 +45,8 @@ defmodule AshOps.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md", "LICENSE.md"],
-      filter_modules: ~r/^Elixir\.AshOps\./
+      extras: ["README.md", "CHANGELOG.md", "LICENSE.md", "documentation/dsls/DSL-AshOps.md"],
+      filter_modules: ~r/^Elixir\.AshOps/
     ]
   end
 
@@ -59,6 +59,7 @@ defmodule AshOps.MixProject do
       {:jason, "~> 1.0"},
       {:spark, "~> 2.0"},
       {:splode, "~> 0.2"},
+      {:yaml_elixir, "~> 2.11"},
       {:ymlr, "~> 5.0"},
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},

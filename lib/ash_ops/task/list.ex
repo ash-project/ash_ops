@@ -1,13 +1,13 @@
 defmodule AshOps.Task.List do
   @moduledoc """
-  Provides the implementation of the `read`` mix task.
+  Provides the implementation of the `list` mix task.
 
   This should only ever be called from the mix task itself.
   """
-  alias Ash.{Query, Resource.Info}
+  alias Ash.Query
   alias AshOps.{QueryLang, Task.ArgSchema}
 
-  import AshOps.Task.Read
+  import AshOps.Task.Common
 
   @doc false
   def run(argv, task, arg_schema) do
@@ -15,54 +15,14 @@ defmodule AshOps.Task.List do
          {:ok, query} <- read_query(cfg),
          {:ok, query} <- QueryLang.parse(task, query),
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
-         {:ok, records} <- load_records(query, task, Map.put(cfg, :actor, actor)) do
-      records
-      |> filter_records(task, cfg)
-      |> serialise_records(cfg.format || :yaml)
+         {:ok, records} <- load_records(query, task, Map.put(cfg, :actor, actor)),
+         {:ok, output} <- serialise_records(records, task, cfg) do
+      Mix.shell().info(output)
+
+      :ok
     else
       {:error, reason} -> handle_error({:error, reason})
     end
-  end
-
-  defp serialise_records(records, :yaml) do
-    records
-    |> Ymlr.document!()
-    |> String.replace_leading("---\n", "")
-    |> Mix.shell().info()
-  end
-
-  defp serialise_records(records, :json) do
-    records
-    |> Jason.encode!(pretty: true)
-    |> Mix.shell().info()
-  end
-
-  defp filter_records(records, task, cfg) do
-    fields =
-      task.resource
-      |> Info.public_fields()
-      |> Enum.map(& &1.name)
-      |> Enum.concat(cfg[:load] || [])
-
-    Enum.map(records, &filter_record(fields, &1))
-  end
-
-  defp filter_record(fields, record, result \\ %{})
-  defp filter_record([], _record, result), do: result
-
-  defp filter_record([field | fields], record, result) when is_atom(field) do
-    case Map.fetch!(record, field) do
-      not_loaded when is_struct(not_loaded, Ash.NotLoaded) ->
-        filter_record(fields, record, result)
-
-      value ->
-        filter_record(fields, record, Map.put(result, field, value))
-    end
-  end
-
-  defp filter_record([{field, children} | fields], record, result) do
-    value = filter_record(children, Map.fetch!(record, field))
-    filter_record(fields, record, Map.put(result, field, value))
   end
 
   defp load_records(query, task, cfg) do
@@ -111,26 +71,30 @@ defmodule AshOps.Task.List do
                   |> ArgSchema.add_switch(
                     :query_stdin,
                     :count,
-                    {:custom, AshOps.Task.Types, :query_stdin, []},
-                    "Read a JSON or YAML query from STDIN"
+                    type: {:custom, AshOps.Task.Types, :query_stdin, []},
+                    required: false,
+                    doc: "Read a JSON or YAML query from STDIN"
                   )
                   |> ArgSchema.add_switch(
                     :query,
                     :string,
-                    {:custom, AshOps.Task.Types, :query, []},
-                    "A filter to apply to the query"
+                    type: {:custom, AshOps.Task.Types, :query, []},
+                    required: false,
+                    doc: "A filter to apply to the query"
                   )
                   |> ArgSchema.add_switch(
                     :limit,
                     :integer,
-                    :non_neg_integer,
-                    "An optional limit to put on the number of records returned"
+                    type: :non_neg_integer,
+                    doc: "An optional limit to put on the number of records returned",
+                    required: false
                   )
                   |> ArgSchema.add_switch(
                     :offset,
                     :integer,
-                    :non_neg_integer,
-                    "An optional number of records to skip"
+                    type: :non_neg_integer,
+                    required: false,
+                    doc: "An optional number of records to skip"
                   )
 
       @shortdoc "Query for `#{inspect(@task.resource)}` records using the `#{@task.action.name}` action"
@@ -138,7 +102,20 @@ defmodule AshOps.Task.List do
       @moduledoc """
       #{@shortdoc}
 
-      #{if @task.action.description, do: "#{@task.action.description}\n\n"}
+      #{if @task.description, do: "#{@task.description}\n\n"}
+
+      #{if @task.action.description, do: """
+        ## Action
+
+        #{@task.action.description}
+
+        """}
+      ## Usage
+
+      Without a query, this task will return all records returned by the
+      `#{@task.action.name}` read action. You can optionally provide a query
+      using the filter language documented below to provide additional filters
+      into the query.
 
       ## Filters
 

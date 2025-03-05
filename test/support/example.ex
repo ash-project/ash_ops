@@ -5,6 +5,7 @@ defmodule Example do
   mix_tasks do
     get __MODULE__.Post, :get_post, :read
     list __MODULE__.Post, :list_posts, :read
+    create __MODULE__.Post, :create_post, :create
   end
 
   resources do
@@ -15,6 +16,7 @@ defmodule Example do
     resource __MODULE__.Post do
       define :create_post, action: :create
       define :update_post, action: :update
+      define :get_post, action: :read, get_by: [:id]
     end
   end
 end

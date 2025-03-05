@@ -12,6 +12,7 @@ Resource actions to expose as mix tasks.
 
 
 ### Nested DSLs
+ * [create](#mix_tasks-create)
  * [get](#mix_tasks-get)
  * [list](#mix_tasks-list)
 
@@ -21,12 +22,65 @@ Resource actions to expose as mix tasks.
 mix_tasks do
   get Post, :get_post, :read
   list Post, :list_posts, :read
+  create Post, :create_post, :create
 end
 
 ```
 
 
 
+
+### mix_tasks.create
+```elixir
+create resource, name, action
+```
+
+
+Generate a mix task which calls a create action and returns the created
+record.
+
+#### Example
+
+Defining the following `create` in your domain:
+
+```elixir
+mix_tasks do
+create Post, :create_post, :create
+end
+```
+
+Will result in the following mix task being available:
+
+```bash
+mix my_app.blog.create_post
+```
+
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`resource`](#mix_tasks-create-resource){: #mix_tasks-create-resource .spark-required} | `module` |  | The resource whose actions to use |
+| [`name`](#mix_tasks-create-name){: #mix_tasks-create-name .spark-required} | `atom` |  | The name of the mix task to generate |
+| [`action`](#mix_tasks-create-action){: #mix_tasks-create-action .spark-required} | `atom` |  | The name of the create action to use |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`description`](#mix_tasks-create-description){: #mix_tasks-create-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
+| [`prefix`](#mix_tasks-create-prefix){: #mix_tasks-create-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first "."). Defaults to the `otp_app` setting of the domain |
+
+
+
+
+
+### Introspection
+
+Target: `AshOps.Entity.Create`
 
 ### mix_tasks.get
 ```elixir
@@ -71,7 +125,7 @@ body: This is the example blog post
 
 | Name | Type | Default | Docs |
 |------|------|---------|------|
-| [`arguments`](#mix_tasks-get-arguments){: #mix_tasks-get-arguments } | `atom \| list(atom)` | `[]` | A comma-separated list of action arguments can be taken as positional arguments on the command line |
+| [`arguments`](#mix_tasks-get-arguments){: #mix_tasks-get-arguments } | `atom \| list(atom)` | `[]` | A list of action arguments which should be taken as positional arguments on the command line |
 | [`description`](#mix_tasks-get-description){: #mix_tasks-get-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
 | [`prefix`](#mix_tasks-get-prefix){: #mix_tasks-get-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first ".").  Defaults to the `otp_app` setting of the domain |
 

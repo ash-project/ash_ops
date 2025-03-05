@@ -1,5 +1,7 @@
 spark_locals_without_parens = [
   arguments: 1,
+  create: 3,
+  create: 4,
   description: 1,
   get: 3,
   get: 4,

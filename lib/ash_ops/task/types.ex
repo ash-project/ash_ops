@@ -83,10 +83,19 @@ defmodule AshOps.Task.Types do
   def positional_arguments(input, _task, _before_args, _after_args),
     do: {:error, "Invalid arguments `#{inspect(input)}`"}
 
-  @doc "Custom option type for format"
-  @spec format(any) :: {:ok, :json | :yaml} | {:error, any}
-  def format("json"), do: {:ok, :json}
-  def format("yaml"), do: {:ok, :yaml}
+  @doc "Custom option type for atom"
+  @spec atom(String.t(), [atom]) :: {:ok, atom} | {:error, any}
+  def atom(input, options) do
+    input = String.downcase(input)
+
+    Enum.reduce_while(options, {:error, "Invalid input `#{input}`"}, fn option, error ->
+      if input == to_string(option) do
+        {:halt, {:ok, option}}
+      else
+        {:cont, error}
+      end
+    end)
+  end
 
   @doc "Custom option type for load"
   @spec load(any, task) :: {:ok, [atom]} | {:error, any}

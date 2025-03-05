@@ -25,15 +25,15 @@ defmodule AshOps.Task.ListTest do
     {:ok, posts: posts}
   end
 
-  test "all records are retrieved by default", %{posts: posts} do
+  test "all records are retrieved by default", %{posts: [post0, post1, post2]} do
     output =
       capture_io(fn ->
         Mix.Task.rerun("ash_ops.example.list_posts")
       end)
 
-    for post <- posts do
-      assert output =~ ~r/- id: #{post.id}\n/m
-    end
+    assert output =~ ~r/id: #{post0.id}\n/m
+    assert output =~ ~r/id: #{post1.id}\n/m
+    assert output =~ ~r/id: #{post2.id}\n/m
   end
 
   test "records can be filtered by a query argument", %{posts: [post0, post1, post2]} do
@@ -42,9 +42,9 @@ defmodule AshOps.Task.ListTest do
         Mix.Task.rerun("ash_ops.example.list_posts", ["--query", "id == '#{post1.id}'"])
       end)
 
-    refute output =~ ~r/- id: #{post0.id}\n/m
-    assert output =~ ~r/- id: #{post1.id}\n/m
-    refute output =~ ~r/- id: #{post2.id}\n/m
+    refute output =~ ~r/id: #{post0.id}\n/m
+    assert output =~ ~r/id: #{post1.id}\n/m
+    refute output =~ ~r/id: #{post2.id}\n/m
   end
 
   test "records can be filtered by a query on STDIN", %{posts: [post0, post1, post2]} do
@@ -53,9 +53,9 @@ defmodule AshOps.Task.ListTest do
         Mix.Task.rerun("ash_ops.example.list_posts", ["--query-stdin"])
       end)
 
-    refute output =~ ~r/- id: #{post0.id}\n/m
-    assert output =~ ~r/- id: #{post1.id}\n/m
-    refute output =~ ~r/- id: #{post2.id}\n/m
+    refute output =~ ~r/id: #{post0.id}\n/m
+    assert output =~ ~r/id: #{post1.id}\n/m
+    refute output =~ ~r/id: #{post2.id}\n/m
   end
 
   test "an offset can be applied", %{posts: [post0, post1, post2]} do
@@ -64,9 +64,9 @@ defmodule AshOps.Task.ListTest do
         Mix.Task.rerun("ash_ops.example.list_posts", ["--offset", "2"])
       end)
 
-    refute output =~ ~r/- id: #{post0.id}\n/m
-    refute output =~ ~r/- id: #{post1.id}\n/m
-    assert output =~ ~r/- id: #{post2.id}\n/m
+    refute output =~ ~r/id: #{post0.id}\n/m
+    refute output =~ ~r/id: #{post1.id}\n/m
+    assert output =~ ~r/id: #{post2.id}\n/m
   end
 
   test "a limit can be applied", %{posts: [post0, post1, post2]} do
@@ -75,9 +75,9 @@ defmodule AshOps.Task.ListTest do
         Mix.Task.rerun("ash_ops.example.list_posts", ["--limit", "2"])
       end)
 
-    assert output =~ ~r/- id: #{post0.id}\n/m
-    assert output =~ ~r/- id: #{post1.id}\n/m
-    refute output =~ ~r/- id: #{post2.id}\n/m
+    assert output =~ ~r/id: #{post0.id}\n/m
+    assert output =~ ~r/id: #{post1.id}\n/m
+    refute output =~ ~r/id: #{post2.id}\n/m
   end
 
   test "it can filter by tenant", %{posts: posts} do
@@ -95,11 +95,11 @@ defmodule AshOps.Task.ListTest do
       end)
 
     for post <- matching_posts do
-      assert output =~ ~r/- id: #{post.id}\n/m
+      assert output =~ ~r/id: #{post.id}\n/m
     end
 
     for post <- non_matching_posts do
-      refute output =~ ~r/- id: #{post.id}\n/m
+      refute output =~ ~r/id: #{post.id}\n/m
     end
   end
 
@@ -110,6 +110,6 @@ defmodule AshOps.Task.ListTest do
       end)
       |> String.trim()
 
-    assert output == "[]"
+    assert output == ""
   end
 end
