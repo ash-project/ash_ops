@@ -1,45 +1,43 @@
-defmodule AshOps.Task.Get do
+defmodule AshOps.Task.Destroy do
   @moduledoc """
-  Provides the implementation of the `get` mix task.
+  Provides the implementation of the `destroy` mix task.
 
   This should only ever be called from the mix task itself.
   """
   alias Ash.{Query, Resource.Info}
   alias AshOps.Task.ArgSchema
-
-  import AshOps.Task.Common
   require Query
+  import AshOps.Task.Common
 
   @doc false
   def run(argv, task, arg_schema) do
     with {:ok, cfg} <- ArgSchema.parse(arg_schema, argv),
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
          cfg <- Map.put(cfg, :actor, actor),
-         {:ok, record} <- load_record(task, cfg),
-         {:ok, output} <- serialise_record(record, task, cfg) do
-      Mix.shell().info(output)
-
+         :ok <- destroy_record(task, cfg) do
       :ok
     else
-      {:error, reason} -> handle_error({:error, reason})
+      {:error, reason} -> handle_error(reason)
     end
   end
 
-  defp load_record(task, cfg) do
+  defp destroy_record(task, cfg) do
     opts =
       cfg
       |> Map.take([:load, :actor, :tenant])
       |> Map.put(:domain, task.domain)
-      |> Map.put(:not_found_error?, true)
-      |> Map.put(:authorize_with, :error)
       |> Enum.to_list()
 
     with {:ok, field} <- identity_or_pk_field(task, cfg) do
       task.resource
       |> Query.new()
-      |> Query.for_read(task.action.name)
       |> Query.filter_input(%{field => %{"eq" => cfg.positional_arguments.id}})
-      |> Ash.read_one(opts)
+      |> Query.for_read(task.read_action.name)
+      |> Ash.bulk_destroy(task.action.name, %{}, opts)
+      |> case do
+        %{status: :success} -> :ok
+        %{errors: errors} -> {:error, Ash.Error.to_error(errors)}
+      end
     end
   end
 
@@ -75,7 +73,7 @@ defmodule AshOps.Task.Get do
                     [:i]
                   )
 
-      @shortdoc "Get a single `#{inspect(@task.resource)}` record using the `#{@task.action.name}` action"
+      @shortdoc "Destroy a single `#{inspect(@task.resource)}` record using the `#{@task.action.name}` action"
 
       @moduledoc """
       #{@shortdoc}
@@ -92,6 +90,8 @@ defmodule AshOps.Task.Get do
       Records are looked up by their primary key unless the `--identity` option
       is used. The identity must not be composite (ie only contain a single
       field).
+
+      Matching records are destroyed.
       #{ArgSchema.usage(@task, @arg_schema)}
       """
       use Mix.Task

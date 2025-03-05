@@ -3,11 +3,14 @@ spark_locals_without_parens = [
   create: 3,
   create: 4,
   description: 1,
+  destroy: 3,
+  destroy: 4,
   get: 3,
   get: 4,
   list: 3,
   list: 4,
-  prefix: 1
+  prefix: 1,
+  read_action: 1
 ]
 
 [

@@ -15,11 +15,13 @@ defmodule AshOps do
         get Post, :get_post, :read
         list Post, :list_posts, :read
         create Post, :create_post, :create
+        destroy Post, :destroy_post, :destroy
       end
       """
     ],
     entities: [
       __MODULE__.Entity.Create.__entity__(),
+      __MODULE__.Entity.Destroy.__entity__(),
       __MODULE__.Entity.Get.__entity__(),
       __MODULE__.Entity.List.__entity__()
     ]

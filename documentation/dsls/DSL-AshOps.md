@@ -13,6 +13,7 @@ Resource actions to expose as mix tasks.
 
 ### Nested DSLs
  * [create](#mix_tasks-create)
+ * [destroy](#mix_tasks-destroy)
  * [get](#mix_tasks-get)
  * [list](#mix_tasks-list)
 
@@ -23,6 +24,7 @@ mix_tasks do
   get Post, :get_post, :read
   list Post, :list_posts, :read
   create Post, :create_post, :create
+  destroy Post, :destroy_post, :destroy
 end
 
 ```
@@ -81,6 +83,61 @@ mix my_app.blog.create_post
 ### Introspection
 
 Target: `AshOps.Entity.Create`
+
+### mix_tasks.destroy
+```elixir
+destroy resource, name, action
+```
+
+
+Generate a mix task which calls a destroy action and removes a single record
+by primary key or identity.
+
+#### Example
+
+Defining the following `destroy` in your domain:
+
+```elixir
+mix_tasks do
+destroy Post, :destroy_post, :destroy
+end
+```
+
+Will result in the following mix task being available:
+
+```bash
+mix my_app.blog.destroy_post "01953abc-c4e9-7661-a79a-243b0d982ab7"
+status: ok
+```
+
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`resource`](#mix_tasks-destroy-resource){: #mix_tasks-destroy-resource .spark-required} | `module` |  | The resource whose action to use |
+| [`name`](#mix_tasks-destroy-name){: #mix_tasks-destroy-name .spark-required} | `atom` |  | The name of the mix task to generate |
+| [`action`](#mix_tasks-destroy-action){: #mix_tasks-destroy-action .spark-required} | `atom` |  | The name of the destroy action to use |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`arguments`](#mix_tasks-destroy-arguments){: #mix_tasks-destroy-arguments } | `atom \| list(atom)` | `[]` | A list of action arguments which should be taken as positional arguments on the command line |
+| [`description`](#mix_tasks-destroy-description){: #mix_tasks-destroy-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
+| [`prefix`](#mix_tasks-destroy-prefix){: #mix_tasks-destroy-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first ".").  Defaults to the `otp_app` setting of the domain |
+| [`read_action`](#mix_tasks-destroy-read_action){: #mix_tasks-destroy-read_action } | `atom` |  | The read action to use to query for matching records to destroy. Defaults to the primary read action. |
+
+
+
+
+
+### Introspection
+
+Target: `AshOps.Entity.Destroy`
 
 ### mix_tasks.get
 ```elixir

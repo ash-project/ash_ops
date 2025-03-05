@@ -1,6 +1,6 @@
 defmodule AshOps.Task.GetTest do
   @moduledoc false
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
   alias Ash.Resource.Info
   import ExUnit.CaptureIO
 

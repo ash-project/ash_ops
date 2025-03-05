@@ -26,6 +26,7 @@ defmodule AshOps.Transformer.PrepareTask do
   defp transform_entity(task, dsl) do
     with :ok <- validate_resource(task, dsl),
          {:ok, action} <- validate_action(task, dsl),
+         {:ok, task} <- validate_read_action(task, dsl),
          {:ok, task} <- set_domain(%{task | action: action}, dsl),
          {:ok, task} <- set_prefix(task, dsl),
          {:ok, task} <- set_task_name(task),
@@ -81,7 +82,7 @@ defmodule AshOps.Transformer.PrepareTask do
            module: get_persisted(dsl, :module),
            path: [:mix_tasks, task.type, task.name, :action],
            message: """
-           Expected the action `#{inspect(task.action)}` on the `#{inspect(task.resource)}` resource to be a read, but it is a #{action.type}.
+           Expected the action `#{task.action}` on the `#{inspect(task.resource)}` resource to be a #{task.type}, but it is a #{action.type}.
            """
          )}
 
@@ -91,11 +92,62 @@ defmodule AshOps.Transformer.PrepareTask do
            module: get_persisted(dsl, :module),
            path: [:mix_tasks, task.type, task.name, :action],
            message: """
-           Expected the action `#{inspect(task.action)}` on the `#{inspect(task.resource)}` resource to be a #{task.type}, but it is a #{action.type}.
+           Expected the action `#{task.action}` on the `#{inspect(task.resource)}` resource to be a #{task.type}, but it is a #{action.type}.
            """
          )}
     end
   end
+
+  defp validate_read_action(task, dsl) when is_nil(task.read_action) do
+    task.resource
+    |> ARI.actions()
+    |> Enum.find(&(&1.type == :read && &1.primary? == true))
+    |> case do
+      nil ->
+        {:error,
+         DslError.exception(
+           module: get_persisted(dsl, :module),
+           path: [:mix_tasks, task.type, task.name, :read_action],
+           message: """
+           Task requires a read action, but none was provided and no primary read is set.
+           """
+         )}
+
+      action ->
+        {:ok, %{task | read_action: action}}
+    end
+  end
+
+  defp validate_read_action(task, dsl) when is_atom(task.read_action) do
+    task.resource
+    |> ARI.action(task.read_action)
+    |> case do
+      %{type: :read} = action ->
+        {:ok, %{task | read_action: action}}
+
+      nil ->
+        {:error,
+         DslError.exception(
+           module: get_persisted(dsl, :module),
+           path: [:mix_tasks, task.type, task.name, :read_action],
+           message: """
+           There is no read action named `#{task.read_action}` on the resource.
+           """
+         )}
+
+      action ->
+        {:error,
+         DslError.exception(
+           module: get_persisted(dsl, :module),
+           path: [:mix_tasks, task.type, task.name, :read_action],
+           message: """
+           Expected the action `#{task.read_action}` to be a read. It is a `#{action.type}`
+           """
+         )}
+    end
+  end
+
+  defp validate_read_action(task, _dsl), do: {:ok, task}
 
   defp set_domain(task, dsl) do
     {:ok, %{task | domain: get_persisted(dsl, :module)}}
