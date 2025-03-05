@@ -81,6 +81,21 @@ defmodule AshOps.Task.Common do
   def serialise_records(records, task, cfg),
     do: serialise_records(records, task, Map.put(cfg, :format, :yaml))
 
+  @doc "Return the filter field for the configured identity, or the primary key"
+  def identity_or_pk_field(task, cfg) when is_atom(cfg.identity) and not is_nil(cfg.identity) do
+    case Info.identity(task.resource, cfg.identity) do
+      %{keys: [field]} -> {:ok, field}
+      _ -> {:error, "Composite identity error"}
+    end
+  end
+
+  def identity_or_pk_field(task, _cfg) do
+    case Info.primary_key(task.resource) do
+      [pk] -> {:ok, pk}
+      _ -> {:error, "Primary key error"}
+    end
+  end
+
   defp format_record(record, :yaml) do
     record
     |> Map.new(fn

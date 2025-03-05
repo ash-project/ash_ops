@@ -10,7 +10,9 @@ spark_locals_without_parens = [
   list: 3,
   list: 4,
   prefix: 1,
-  read_action: 1
+  read_action: 1,
+  update: 3,
+  update: 4
 ]
 
 [

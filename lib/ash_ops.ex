@@ -12,10 +12,11 @@ defmodule AshOps do
     examples: [
       """
       mix_tasks do
-        get Post, :get_post, :read
-        list Post, :list_posts, :read
         create Post, :create_post, :create
         destroy Post, :destroy_post, :destroy
+        get Post, :get_post, :read
+        list Post, :list_posts, :read
+        update Post, :update_post, :update
       end
       """
     ],
@@ -23,7 +24,8 @@ defmodule AshOps do
       __MODULE__.Entity.Create.__entity__(),
       __MODULE__.Entity.Destroy.__entity__(),
       __MODULE__.Entity.Get.__entity__(),
-      __MODULE__.Entity.List.__entity__()
+      __MODULE__.Entity.List.__entity__(),
+      __MODULE__.Entity.Update.__entity__()
     ]
   }
 

@@ -4,7 +4,7 @@ defmodule AshOps.Task.Get do
 
   This should only ever be called from the mix task itself.
   """
-  alias Ash.{Query, Resource.Info}
+  alias Ash.Query
   alias AshOps.Task.ArgSchema
 
   import AshOps.Task.Common
@@ -40,20 +40,6 @@ defmodule AshOps.Task.Get do
       |> Query.for_read(task.action.name)
       |> Query.filter_input(%{field => %{"eq" => cfg.positional_arguments.id}})
       |> Ash.read_one(opts)
-    end
-  end
-
-  defp identity_or_pk_field(task, cfg) when is_atom(cfg.identity) and not is_nil(cfg.identity) do
-    case Info.identity(task.resource, cfg.identity) do
-      %{keys: [field]} -> {:ok, field}
-      _ -> {:error, "Composite identity error"}
-    end
-  end
-
-  defp identity_or_pk_field(task, _cfg) do
-    case Info.primary_key(task.resource) do
-      [pk] -> {:ok, pk}
-      _ -> {:error, "Primary key error"}
     end
   end
 

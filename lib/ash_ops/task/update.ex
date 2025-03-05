@@ -1,19 +1,22 @@
-defmodule AshOps.Task.Create do
+defmodule AshOps.Task.Update do
   @moduledoc """
-  Provides the implementation of the `create` mix task.
+  Provides the implementation of the `update` mix task.
 
   This should only ever be called from the mix task itself.
   """
-
-  alias Ash.{Changeset, Resource.Info}
+  alias Ash.{Changeset, Query, Resource.Info}
   alias AshOps.Task.ArgSchema
+  require Query
   import AshOps.Task.Common
 
   @doc false
   def run(argv, task, arg_schema) do
     with {:ok, cfg} <- ArgSchema.parse(arg_schema, argv),
-         {:ok, changeset} <- read_input(task, cfg),
-         {:ok, record} <- create_record(changeset, task, cfg),
+         {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
+         cfg <- Map.put(cfg, :actor, actor),
+         {:ok, record} <- load_record(task, cfg),
+         {:ok, changeset} <- read_input(record, task, cfg),
+         {:ok, record} <- update_record(changeset, task, cfg),
          {:ok, output} <- serialise_record(record, task, cfg) do
       Mix.shell().info(output)
       :ok
@@ -22,19 +25,35 @@ defmodule AshOps.Task.Create do
     end
   end
 
-  defp create_record(changeset, task, cfg) do
+  defp update_record(changeset, task, cfg) do
     opts =
       cfg
       |> Map.take([:load, :actor, :tenant])
       |> Map.put(:domain, task.domain)
       |> Enum.to_list()
 
-    changeset
-    |> Changeset.for_create(task.action)
-    |> Ash.create(opts)
+    Ash.update(changeset, %{}, opts)
   end
 
-  defp read_input(task, cfg) when cfg.input == :interactive do
+  defp load_record(task, cfg) do
+    opts =
+      cfg
+      |> Map.take([:actor, :tenant])
+      |> Map.put(:domain, task.domain)
+      |> Map.put(:not_found_error?, true)
+      |> Map.put(:authorize_with, :error)
+      |> Enum.to_list()
+
+    with {:ok, field} <- identity_or_pk_field(task, cfg) do
+      task.resource
+      |> Query.new()
+      |> Query.for_read(task.read_action.name)
+      |> Query.filter_input(%{field => %{"eq" => cfg.positional_arguments.id}})
+      |> Ash.read_one(opts)
+    end
+  end
+
+  defp read_input(record, task, cfg) when cfg.input == :interactive do
     argument_names =
       task.action.arguments
       |> Enum.filter(& &1.public?)
@@ -47,16 +66,16 @@ defmodule AshOps.Task.Create do
       |> MapSet.union(argument_names)
 
     changeset =
-      task.resource
+      record
       |> Changeset.new()
 
     Mix.shell().info(
       IO.ANSI.format([
-        "Creating new ",
+        "Updating ",
         :cyan,
         inspect(task.resource),
         :reset,
-        " using the ",
+        " record using the ",
         :cyan,
         to_string(task.action.name),
         :reset,
@@ -67,14 +86,14 @@ defmodule AshOps.Task.Create do
     prompt_for_inputs(inputs, task, changeset)
   end
 
-  defp read_input(task, cfg) when cfg.input == :yaml do
+  defp read_input(record, task, cfg) when cfg.input == :yaml do
     with {:ok, input} <- read_stdin() do
       case YamlElixir.read_from_string(input) do
         {:ok, map} when is_map(map) ->
           changeset =
-            task.resource
+            record
             |> Changeset.new()
-            |> Changeset.for_create(task.action.name, map)
+            |> Changeset.for_update(task.action.name, map)
 
           {:ok, changeset}
 
@@ -87,14 +106,14 @@ defmodule AshOps.Task.Create do
     end
   end
 
-  defp read_input(task, cfg) when cfg.input == :json do
+  defp read_input(record, task, cfg) when cfg.input == :json do
     with {:ok, input} <- read_stdin() do
       case Jason.decode(input) do
         {:ok, map} when is_map(map) ->
           changeset =
-            task.resource
+            record
             |> Changeset.new()
-            |> Changeset.for_create(task.action, map)
+            |> Changeset.for_update(task.action, map)
 
           {:ok, changeset}
 
@@ -130,13 +149,7 @@ defmodule AshOps.Task.Create do
           {:attribute, attribute}
         end
 
-      case prompt_for_input(
-             input_name,
-             input_type,
-             task,
-             changeset,
-             entity
-           ) do
+      case prompt_for_input(input_name, input_type, task, changeset, entity) do
         {:ok, changeset} -> {:cont, {:ok, changeset}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
@@ -148,7 +161,7 @@ defmodule AshOps.Task.Create do
   defp prompt_for_input(input_name, input_type, task, changeset, entity, 0) do
     prompt =
       IO.ANSI.format([
-        "Looks like you're having trouble entering the ",
+        "Looks like you're having trouble updating the ",
         :cyan,
         to_string(input_name),
         :reset,
@@ -164,6 +177,12 @@ defmodule AshOps.Task.Create do
   end
 
   defp prompt_for_input(input_name, input_type, task, input_changeset, entity, retries) do
+    current_value =
+      input_changeset
+      |> Changeset.get_argument_or_attribute(input_name)
+      |> inspect(syntax_colors: IO.ANSI.syntax_colors())
+      |> then(&(&1 <> "\n"))
+
     prompt =
       IO.ANSI.format([
         "[",
@@ -177,7 +196,7 @@ defmodule AshOps.Task.Create do
       |> IO.iodata_to_binary()
 
     input =
-      prompt
+      (current_value <> prompt)
       |> Mix.shell().prompt()
       |> String.trim()
 
@@ -188,7 +207,7 @@ defmodule AshOps.Task.Create do
       end
 
     changeset
-    |> Changeset.for_create(task.action)
+    |> Changeset.for_update(task.action)
     |> Map.get(:errors, [])
     |> Enum.filter(&(&1.field == input_name))
     |> case do
@@ -221,35 +240,46 @@ defmodule AshOps.Task.Create do
       @task unquote(opts[:task])
       @arg_schema @task
                   |> ArgSchema.default()
+                  |> ArgSchema.prepend_positional(:id, "A unique identifier for the record")
                   |> ArgSchema.add_switch(
-                    :input,
+                    :identity,
                     :string,
                     [
-                      type: {:custom, AshOps.Task.Types, :atom, [[:json, :yaml, :interactive]]},
-                      default: "interactive",
+                      type: {:custom, AshOps.Task.Types, :identity, [@task]},
                       required: false,
-                      doc:
-                        "Read action input from STDIN in this format. Valid options are `json`, `yaml` and `interactive`.  Defaults to `interactive`."
+                      doc: "The identity to use to retrieve the record."
                     ],
                     [:i]
                   )
+                  |> ArgSchema.add_switch(
+                    :input,
+                    :string,
+                    type: {:custom, AshOps.Task.Types, :atom, [[:json, :yaml, :interactive]]},
+                    default: "interactive",
+                    required: false,
+                    doc:
+                      "Read action input from STDIN in this format. Valid options are `json`, `yaml` and `interactive`.  Defaults to `interactive`."
+                  )
 
-      @shortdoc "Create a `#{inspect(@task.resource)}` record using the `#{@task.action.name}` action"
+      @shortdoc "Update a single `#{inspect(@task.resource)}` record using the `#{@task.action.name}` action"
 
       @moduledoc """
       #{@shortdoc}
 
       #{if @task.description, do: "#{@task.description}\n\n"}
-
       #{if @task.action.description, do: """
         ## Action
 
         #{@task.action.description}
-
         """}
       ## Usage
 
-      Action input can be provided via YAML or JSON on STDIN, or interactively.
+      Records are looked up by their primary key unless the `--identity` option
+      is used. The identity must not be composite (ie only contain a single
+      field).
+
+      Matching records are updated using input provided as YAML or JSON on
+      STDIN or interactively.
 
       #{ArgSchema.usage(@task, @arg_schema)}
       """

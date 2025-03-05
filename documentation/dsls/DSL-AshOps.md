@@ -16,15 +16,17 @@ Resource actions to expose as mix tasks.
  * [destroy](#mix_tasks-destroy)
  * [get](#mix_tasks-get)
  * [list](#mix_tasks-list)
+ * [update](#mix_tasks-update)
 
 
 ### Examples
 ```
 mix_tasks do
-  get Post, :get_post, :read
-  list Post, :list_posts, :read
   create Post, :create_post, :create
   destroy Post, :destroy_post, :destroy
+  get Post, :get_post, :read
+  list Post, :list_posts, :read
+  update Post, :update_post, :update
 end
 
 ```
@@ -245,6 +247,60 @@ mix my_app.blog.list_posts
 ### Introspection
 
 Target: `AshOps.Entity.List`
+
+### mix_tasks.update
+```elixir
+update resource, name, action
+```
+
+
+Generate a mix task which calls an update action and updates a single record
+by primary key or identity.
+
+#### Example
+
+Defining the following `update` in your domain:
+
+```elixir
+mix_tasks do
+update Post, :update_post, :update
+end
+```
+
+Will result in the following mix task being available:
+
+```bash
+mix my_app.blog.update_post "01953abc-c4e9-7661-a79a-243b0d982ab7"
+```
+
+
+
+
+
+
+### Arguments
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`resource`](#mix_tasks-update-resource){: #mix_tasks-update-resource .spark-required} | `module` |  | The resource whose action to use |
+| [`name`](#mix_tasks-update-name){: #mix_tasks-update-name .spark-required} | `atom` |  | The name of the mix task to generate |
+| [`action`](#mix_tasks-update-action){: #mix_tasks-update-action .spark-required} | `atom` |  | The name of the destroy action to use |
+### Options
+
+| Name | Type | Default | Docs |
+|------|------|---------|------|
+| [`arguments`](#mix_tasks-update-arguments){: #mix_tasks-update-arguments } | `atom \| list(atom)` | `[]` | A list of action arguments which should be taken as positional arguments on the command line |
+| [`description`](#mix_tasks-update-description){: #mix_tasks-update-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
+| [`prefix`](#mix_tasks-update-prefix){: #mix_tasks-update-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first ".").  Defaults to the `otp_app` setting of the domain |
+| [`read_action`](#mix_tasks-update-read_action){: #mix_tasks-update-read_action } | `atom` |  | The read action to use to query for matching records to update. Defaults to the primary read action. |
+
+
+
+
+
+### Introspection
+
+Target: `AshOps.Entity.Update`
 
 
 

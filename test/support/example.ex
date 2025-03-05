@@ -7,6 +7,7 @@ defmodule Example do
     list __MODULE__.Post, :list_posts, :read
     create __MODULE__.Post, :create_post, :create
     destroy __MODULE__.Post, :destroy_post, :destroy
+    update __MODULE__.Post, :update_post, :update
   end
 
   resources do

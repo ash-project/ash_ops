@@ -1,6 +1,6 @@
-defmodule AshOps.Entity.Destroy do
+defmodule AshOps.Entity.Update do
   @moduledoc """
-  The `mix_tasks.destroy` DSL entity.
+  The `mix_tasks.update` DSL entity.
   """
 
   defstruct [
@@ -14,12 +14,12 @@ defmodule AshOps.Entity.Destroy do
     :resource,
     :task_name,
     arguments: [],
-    type: :destroy
+    type: :update
   ]
 
   @type t :: %__MODULE__{
           __identifier__: any,
-          action: atom | Ash.Resource.Actions.Destroy.t(),
+          action: atom | Ash.Resource.Actions.Update.t(),
           arguments: [atom],
           description: nil | String.t(),
           domain: module,
@@ -28,32 +28,31 @@ defmodule AshOps.Entity.Destroy do
           read_action: nil | atom | Ash.Resource.Actions.Read.t(),
           resource: module,
           task_name: atom,
-          type: :destroy
+          type: :update
         }
 
   @doc false
   def __entity__ do
     %Spark.Dsl.Entity{
-      name: :destroy,
+      name: :update,
       describe: """
-      Generate a mix task which calls a destroy action and removes a single record
+      Generate a mix task which calls an update action and updates a single record
       by primary key or identity.
 
       ## Example
 
-      Defining the following `destroy` in your domain:
+      Defining the following `update` in your domain:
 
       ```elixir
       mix_tasks do
-        destroy Post, :destroy_post, :destroy
+        update Post, :update_post, :update
       end
       ```
 
       Will result in the following mix task being available:
 
       ```bash
-      mix my_app.blog.destroy_post "01953abc-c4e9-7661-a79a-243b0d982ab7"
-      status: ok
+      mix my_app.blog.update_post "01953abc-c4e9-7661-a79a-243b0d982ab7"
       ```
       """,
       target: __MODULE__,
@@ -92,7 +91,7 @@ defmodule AshOps.Entity.Destroy do
           type: :atom,
           required: false,
           doc:
-            "The read action to use to query for matching records to destroy. Defaults to the primary read action."
+            "The read action to use to query for matching records to update. Defaults to the primary read action."
         ],
         resource: [
           type: {:spark, Ash.Resource},
