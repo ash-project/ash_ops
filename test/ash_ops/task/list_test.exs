@@ -15,7 +15,7 @@ defmodule AshOps.Task.ListTest do
       1..3
       |> Enum.map(fn i ->
         Example.create_post!(%{
-          title: "#{Faker.Food.dish()}-#{i}",
+          title: "#{i}: #{Faker.Food.dish()}",
           body: Faker.Food.description(),
           slug: Faker.Internet.slug(),
           tenant: Faker.Lorem.word()
@@ -36,10 +36,10 @@ defmodule AshOps.Task.ListTest do
     assert output =~ ~r/id: #{post2.id}\n/m
   end
 
-  test "records can be filtered by a query argument", %{posts: [post0, post1, post2]} do
+  test "records can be filtered by a filter argument", %{posts: [post0, post1, post2]} do
     output =
       capture_io(fn ->
-        Mix.Task.rerun("ash_ops.example.list_posts", ["--query", "id == '#{post1.id}'"])
+        Mix.Task.rerun("ash_ops.example.list_posts", ["--filter", "id == '#{post1.id}'"])
       end)
 
     refute output =~ ~r/id: #{post0.id}\n/m
@@ -47,10 +47,10 @@ defmodule AshOps.Task.ListTest do
     refute output =~ ~r/id: #{post2.id}\n/m
   end
 
-  test "records can be filtered by a query on STDIN", %{posts: [post0, post1, post2]} do
+  test "records can be filtered by a filter on STDIN", %{posts: [post0, post1, post2]} do
     output =
       capture_io(:stdio, "id == '#{post1.id}'", fn ->
-        Mix.Task.rerun("ash_ops.example.list_posts", ["--query-stdin"])
+        Mix.Task.rerun("ash_ops.example.list_posts", ["--filter-stdin"])
       end)
 
     refute output =~ ~r/id: #{post0.id}\n/m
@@ -78,6 +78,17 @@ defmodule AshOps.Task.ListTest do
     assert output =~ ~r/id: #{post0.id}\n/m
     assert output =~ ~r/id: #{post1.id}\n/m
     refute output =~ ~r/id: #{post2.id}\n/m
+  end
+
+  test "a sort can be applied", %{posts: [post0, post1, post2]} do
+    output =
+      capture_io(fn ->
+        Mix.Task.rerun("ash_ops.example.list_posts", ["--sort", "'-title'", "--limit", "1"])
+      end)
+
+    refute output =~ ~r/id: #{post0.id}\n/m
+    refute output =~ ~r/id: #{post1.id}\n/m
+    assert output =~ ~r/id: #{post2.id}\n/m
   end
 
   test "it can filter by tenant", %{posts: posts} do
