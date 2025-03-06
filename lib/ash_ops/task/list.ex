@@ -109,6 +109,14 @@ defmodule AshOps.Task.List do
                     required: false,
                     doc: "An optional sort to apply to the query"
                   )
+                  |> ArgSchema.add_switch(
+                    :metadata,
+                    :boolean,
+                    type: :boolean,
+                    required: false,
+                    default: false,
+                    doc: "Whether or not to include any record metadata in the result"
+                  )
 
       @shortdoc "Query for `#{inspect(@task.resource)}` records using the `#{@task.action.name}` action"
 
