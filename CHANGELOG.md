@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## v0.2.2 (2025-03-06)
+
+
+
+
+### Bug Fixes:
+
+* correct dependency options.
+
 ## v0.2.1 (2025-03-06)
 
 
