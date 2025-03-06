@@ -5,6 +5,23 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## v0.2.3 (2025-03-06)
+
+
+
+
+### Bug Fixes:
+
+* Set the changeset's action when all inputs are parsed. (#3)
+
+### Improvements:
+
+* Rename `--query` to `--filter` and add `--sort` option to list tasks. (#4)
+
+* Rename `--query` to `--filter` because that's what it is.
+
+* Add `--sort` option to list tasks.
+
 ## v0.2.2 (2025-03-06)
 
 
