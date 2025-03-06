@@ -83,7 +83,9 @@ defmodule AshOps.Task.Update do
       ])
     )
 
-    prompt_for_inputs(inputs, task, changeset)
+    with {:ok, changeset} <- prompt_for_inputs(inputs, task, changeset) do
+      {:ok, Changeset.for_update(changeset, task.update)}
+    end
   end
 
   defp read_input(record, task, cfg) when cfg.input == :yaml do
