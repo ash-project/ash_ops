@@ -119,6 +119,17 @@ defmodule AshOps.Task.Types do
   @spec filter_stdin(any) :: {:ok, boolean} | {:error, any}
   def filter_stdin(input), do: {:ok, input > 0}
 
+  @doc "Parse a sort input"
+  @spec sort_input(any) :: {:ok, String.t()} | {:error, any}
+  def sort_input(input) when is_binary(input) do
+    input =
+      input
+      |> String.trim("'")
+      |> String.trim("\"")
+
+    {:ok, input}
+  end
+
   defp build_nested_loads(loads, result \\ {[], []})
   defp build_nested_loads([], {l_opts, kw_opts}), do: Enum.concat(l_opts, kw_opts)
 

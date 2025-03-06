@@ -35,6 +35,7 @@ defmodule AshOps.Task.List do
     query
     |> maybe_add_limit(cfg[:limit])
     |> maybe_add_offset(cfg[:offset])
+    |> maybe_add_sort(cfg[:sort])
     |> Ash.read(opts)
   end
 
@@ -47,6 +48,11 @@ defmodule AshOps.Task.List do
 
   defp maybe_add_offset(query, offset) when is_integer(offset) and offset >= 0,
     do: Query.offset(query, offset)
+
+  defp maybe_add_sort(query, nil), do: query
+
+  defp maybe_add_sort(query, sort),
+    do: Query.sort_input(query, sort)
 
   defp read_filter(cfg) when is_binary(cfg.filter) and cfg.filter_stdin == true,
     do: {:error, "Cannot set both `filter` and `filter-stdin` at the same time"}
@@ -96,6 +102,13 @@ defmodule AshOps.Task.List do
                     required: false,
                     doc: "An optional number of records to skip"
                   )
+                  |> ArgSchema.add_switch(
+                    :sort,
+                    :string,
+                    type: {:custom, AshOps.Task.Types, :sort_input, []},
+                    required: false,
+                    doc: "An optional sort to apply to the query"
+                  )
 
       @shortdoc "Query for `#{inspect(@task.resource)}` records using the `#{@task.action.name}` action"
 
@@ -120,6 +133,11 @@ defmodule AshOps.Task.List do
       ## Filters
 
       #{AshOps.QueryLang.doc()}
+
+      ## Sorting
+
+      You can use [Ash's text based sort format](https://hexdocs.pm/ash/Ash.Query.html#sort/3-format)
+      to provide a sorting order for the returned records.
 
       #{ArgSchema.usage(@task, @arg_schema)}
       """
