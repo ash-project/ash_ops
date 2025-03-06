@@ -5,6 +5,19 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## v0.2.1 (2025-03-06)
+
+
+
+
+### Bug Fixes:
+
+* git_ops generated configuration is incorrect.
+
+### Improvements:
+
+* Add igniter installer
+
 ## v0.2.0 (2025-03-05)
 
 

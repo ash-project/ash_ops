@@ -2,7 +2,7 @@ defmodule AshOps.MixProject do
   use Mix.Project
 
   @moduledoc "An Ash extension which generates mix tasks for Ash actions"
-  @version "0.2.0"
+  @version "0.2.1"
   def project do
     [
       aliases: aliases(),
