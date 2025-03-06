@@ -119,8 +119,15 @@ defmodule AshOps.Task.Common do
     |> Info.public_fields()
     |> Enum.map(& &1.name)
     |> Enum.concat(cfg[:load] || [])
+    |> Enum.concat(include_metadata?(record, cfg))
     |> do_filter_record(record)
   end
+
+  defp include_metadata?(record, cfg)
+       when cfg.metadata == true and map_size(record.__metadata__) > 0,
+       do: [:__metadata__]
+
+  defp include_metadata?(_record, _cfg), do: []
 
   defp do_filter_record(fields, record, result \\ %{})
   defp do_filter_record([], _record, result), do: result

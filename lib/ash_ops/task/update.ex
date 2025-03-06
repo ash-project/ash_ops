@@ -262,6 +262,14 @@ defmodule AshOps.Task.Update do
                     doc:
                       "Read action input from STDIN in this format. Valid options are `json`, `yaml` and `interactive`.  Defaults to `interactive`."
                   )
+                  |> ArgSchema.add_switch(
+                    :metadata,
+                    :boolean,
+                    type: :boolean,
+                    required: false,
+                    default: false,
+                    doc: "Whether or not to include any record metadata in the result"
+                  )
 
       @shortdoc "Update a single `#{inspect(@task.resource)}` record using the `#{@task.action.name}` action"
 
