@@ -12,7 +12,7 @@ defmodule AshOps.Task.List do
   @doc false
   def run(argv, task, arg_schema) do
     with {:ok, cfg} <- ArgSchema.parse(arg_schema, argv),
-         {:ok, query} <- read_query(cfg),
+         {:ok, query} <- read_filter(cfg),
          {:ok, query} <- QueryLang.parse(task, query),
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
          {:ok, records} <- load_records(query, task, Map.put(cfg, :actor, actor)),
@@ -48,19 +48,19 @@ defmodule AshOps.Task.List do
   defp maybe_add_offset(query, offset) when is_integer(offset) and offset >= 0,
     do: Query.offset(query, offset)
 
-  defp read_query(cfg) when is_binary(cfg.query) and cfg.query_stdin == true,
-    do: {:error, "Cannot set both `query` and `query-stdin` at the same time"}
+  defp read_filter(cfg) when is_binary(cfg.filter) and cfg.filter_stdin == true,
+    do: {:error, "Cannot set both `filter` and `filter-stdin` at the same time"}
 
-  defp read_query(cfg) when cfg.query_stdin == true do
+  defp read_filter(cfg) when cfg.filter_stdin == true do
     case IO.read(:eof) do
       {:error, reason} -> {:error, "Unable to read query from STDIN: #{inspect(reason)}"}
       :eof -> {:error, "No query received on STDIN"}
-      query -> {:ok, query}
+      filter -> {:ok, filter}
     end
   end
 
-  defp read_query(cfg) when is_binary(cfg.query), do: {:ok, cfg.query}
-  defp read_query(_), do: {:ok, nil}
+  defp read_filter(cfg) when is_binary(cfg.filter), do: {:ok, cfg.filter}
+  defp read_filter(_), do: {:ok, nil}
 
   @doc false
   defmacro __using__(opts) do
@@ -69,18 +69,18 @@ defmodule AshOps.Task.List do
       @arg_schema @task
                   |> ArgSchema.default()
                   |> ArgSchema.add_switch(
-                    :query_stdin,
+                    :filter_stdin,
                     :count,
-                    type: {:custom, AshOps.Task.Types, :query_stdin, []},
+                    type: {:custom, AshOps.Task.Types, :filter_stdin, []},
                     required: false,
-                    doc: "Read a JSON or YAML query from STDIN"
+                    doc: "Read a JSON or YAML filter from STDIN"
                   )
                   |> ArgSchema.add_switch(
-                    :query,
+                    :filter,
                     :string,
-                    type: {:custom, AshOps.Task.Types, :query, []},
+                    type: {:custom, AshOps.Task.Types, :filter, []},
                     required: false,
-                    doc: "A filter to apply to the query"
+                    doc: "A filter to apply to the filter"
                   )
                   |> ArgSchema.add_switch(
                     :limit,

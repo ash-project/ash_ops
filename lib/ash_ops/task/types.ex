@@ -110,14 +110,14 @@ defmodule AshOps.Task.Types do
   def load(input, _task), do: {:error, "Invalid load `#{inspect(input)}`"}
 
   @doc "Custom option type for query filters"
-  @spec query(any) :: {:ok, String.t()} | {:error, any}
-  def query(input) when is_binary(input), do: {:ok, input}
+  @spec filter(any) :: {:ok, String.t()} | {:error, any}
+  def filter(input) when is_binary(input), do: {:ok, input}
 
-  def query(input), do: {:error, "Invalid query `#{inspect(input)}`"}
+  def filter(input), do: {:error, "Invalid filter `#{inspect(input)}`"}
 
-  @doc "Custom option type for query-stdin"
-  @spec query_stdin(any) :: {:ok, boolean} | {:error, any}
-  def query_stdin(input), do: {:ok, input > 0}
+  @doc "Custom option type for filter-stdin"
+  @spec filter_stdin(any) :: {:ok, boolean} | {:error, any}
+  def filter_stdin(input), do: {:ok, input > 0}
 
   defp build_nested_loads(loads, result \\ {[], []})
   defp build_nested_loads([], {l_opts, kw_opts}), do: Enum.concat(l_opts, kw_opts)

@@ -39,7 +39,7 @@ defmodule AshOps.Task.ListTest do
   test "records can be filtered by a query argument", %{posts: [post0, post1, post2]} do
     output =
       capture_io(fn ->
-        Mix.Task.rerun("ash_ops.example.list_posts", ["--query", "id == '#{post1.id}'"])
+        Mix.Task.rerun("ash_ops.example.list_posts", ["--filter", "id == '#{post1.id}'"])
       end)
 
     refute output =~ ~r/id: #{post0.id}\n/m
@@ -50,7 +50,7 @@ defmodule AshOps.Task.ListTest do
   test "records can be filtered by a query on STDIN", %{posts: [post0, post1, post2]} do
     output =
       capture_io(:stdio, "id == '#{post1.id}'", fn ->
-        Mix.Task.rerun("ash_ops.example.list_posts", ["--query-stdin"])
+        Mix.Task.rerun("ash_ops.example.list_posts", ["--filter-stdin"])
       end)
 
     refute output =~ ~r/id: #{post0.id}\n/m
