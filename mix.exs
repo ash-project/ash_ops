@@ -54,8 +54,6 @@ defmodule AshOps.MixProject do
   defp deps do
     [
       {:ash, "~> 3.0"},
-      {:ex_check, "~> 0.16"},
-      {:ex_doc, "~> 0.37"},
       {:jason, "~> 1.0"},
       {:spark, "~> 2.0"},
       {:splode, "~> 0.2"},
@@ -64,6 +62,8 @@ defmodule AshOps.MixProject do
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:doctor, "~> 0.22", only: [:dev, :test], runtime: false},
+      {:ex_check, "~> 0.16", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.37", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.18", only: [:dev, :test]},
       {:git_ops, "~> 2.0", only: [:dev, :test], runtime: false},
       {:igniter, "~> 0.5", only: [:dev, :test], optional: true},
