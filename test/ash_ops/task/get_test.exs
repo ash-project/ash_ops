@@ -167,4 +167,13 @@ defmodule AshOps.Task.GetTest do
     assert output =~ ~r/id: #{post.id}/m
     assert output =~ ~r/author:\n  id: #{author.id}/m
   end
+
+  test "metadata can be included in the output", %{post: post} do
+    output =
+      capture_io(fn ->
+        Mix.Task.rerun("ash_ops.example.get_post", ["--metadata", post.id])
+      end)
+
+    assert output =~ ~r/__metadata__:/m
+  end
 end
