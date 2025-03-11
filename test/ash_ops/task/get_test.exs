@@ -73,7 +73,7 @@ defmodule AshOps.Task.GetTest do
         ])
       end)
 
-    assert output =~ ~r/not found/m
+    assert output =~ ~r/not found/im
   end
 
   test "it can format the output as JSON", %{post: post} do
@@ -125,7 +125,7 @@ defmodule AshOps.Task.GetTest do
         ])
       end)
 
-    assert output =~ ~r/forbidden/m
+    assert output =~ ~r/forbidden/im
   end
 
   test "when the post doesn't exist, it fails" do
@@ -134,7 +134,7 @@ defmodule AshOps.Task.GetTest do
         Mix.Task.rerun("ash_ops.example.get_post", [to_string(Ash.UUID.generate())])
       end)
 
-    assert output =~ ~r/not found/m
+    assert output =~ ~r/not found/im
   end
 
   test "calculations can be loaded and returned", %{post: post} do
