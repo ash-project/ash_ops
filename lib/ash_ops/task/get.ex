@@ -60,6 +60,14 @@ defmodule AshOps.Task.Get do
                     ],
                     [:i]
                   )
+                  |> ArgSchema.add_switch(
+                    :metadata,
+                    :boolean,
+                    type: :boolean,
+                    required: false,
+                    default: false,
+                    doc: "Whether or not to include any record metadata in the result"
+                  )
 
       @shortdoc "Get a single `#{inspect(@task.resource)}` record using the `#{@task.action.name}` action"
 
