@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## v0.2.4 (2025-04-15)
+
+
+
+
+### Improvements:
+
+* encode record or records returned from generic actions
+
 ## v0.2.3 (2025-03-06)
 
 
