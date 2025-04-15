@@ -14,7 +14,8 @@ defmodule AshOps.Task.Action do
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
          cfg <- Map.put(cfg, :actor, actor),
          {:ok, result} <- run_action(task, cfg),
-         {:ok, output} <- serialise_result(result, cfg) do
+         {:ok, result} <- maybe_load(result, task, cfg),
+         {:ok, output} <- serialise_result(result, task, cfg) do
       Mix.shell().info(output)
 
       :ok
@@ -22,6 +23,35 @@ defmodule AshOps.Task.Action do
       {:error, reason} -> handle_error({:error, reason})
     end
   end
+
+  defp maybe_load(result, task, cfg) do
+    if record_or_records?(result) do
+      {load, opts} =
+        cfg
+        |> Map.take([:load, :actor, :tenant])
+        |> Map.put(:domain, task.domain)
+        |> Keyword.new()
+        |> Keyword.pop(:load)
+
+      if load == [] do
+        {:ok, result}
+      else
+        Ash.load(result, load, opts)
+      end
+    else
+      {:ok, result}
+    end
+  end
+
+  defp record_or_records?([%struct{} | _]) do
+    Ash.Resource.Info.resource?(struct)
+  end
+
+  defp record_or_records?(%struct{}) do
+    Ash.Resource.Info.resource?(struct)
+  end
+
+  defp record_or_records?(_), do: false
 
   defp run_action(task, cfg) do
     args =
@@ -44,7 +74,19 @@ defmodule AshOps.Task.Action do
     end
   end
 
-  defp serialise_result(result, cfg) when cfg.format == :yaml do
+  defp serialise_result(result, task, cfg) do
+    if record_or_records?(result) do
+      if is_list(result) do
+        serialise_records(result, task, cfg)
+      else
+        serialise_record(result, task, cfg)
+      end
+    else
+      serialise_generic_result(result, cfg)
+    end
+  end
+
+  defp serialise_generic_result(result, cfg) when cfg.format == :yaml do
     result
     |> Ymlr.document()
     |> case do
@@ -53,7 +95,7 @@ defmodule AshOps.Task.Action do
     end
   end
 
-  defp serialise_result(result, cfg) when cfg.format == :json do
+  defp serialise_generic_result(result, cfg) when cfg.format == :json do
     result
     |> Jason.encode(pretty: true)
   end
