@@ -8,10 +8,11 @@ defmodule Example.Post do
   actions do
     defaults [:read, :destroy, create: :*, update: :*]
 
-    action :publish, :boolean do
+    action :publish, :struct do
+      constraints instance_of: __MODULE__
       argument :id, :uuid, public?: true, allow_nil?: false
       argument :platform, :string, public?: true, allow_nil?: false
-      run fn _, _ -> {:ok, true} end
+      run fn input, _ -> {:ok, %__MODULE__{id: input.arguments.id}} end
     end
   end
 

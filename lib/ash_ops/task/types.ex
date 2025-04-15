@@ -76,7 +76,7 @@ defmodule AshOps.Task.Types do
       {:ok, args}
     else
       {:error,
-       "Expected #{input_length} positional arguments, but received #{expected_arg_count}"}
+       "Expected #{expected_arg_count} positional arguments, but received #{input_length}"}
     end
   end
 
