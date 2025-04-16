@@ -4,7 +4,7 @@ defmodule AshOps.Task.Action do
 
   This should only ever be called from the mix task itself.
   """
-  alias Ash.ActionInput
+  alias Ash.{ActionInput, Resource.Info}
   alias AshOps.Task.ArgSchema
   import AshOps.Task.Common
 
@@ -44,11 +44,11 @@ defmodule AshOps.Task.Action do
   end
 
   defp record_or_records?([%struct{} | _]) do
-    Ash.Resource.Info.resource?(struct)
+    Info.resource?(struct)
   end
 
   defp record_or_records?(%struct{}) do
-    Ash.Resource.Info.resource?(struct)
+    Info.resource?(struct)
   end
 
   defp record_or_records?(_), do: false
