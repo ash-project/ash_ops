@@ -79,7 +79,8 @@ defmodule AshOps.MixProject do
     [
       "spark.formatter": "spark.formatter --extensions AshOps",
       "spark.cheat_sheets": "spark.cheat_sheets --extensions AshOps",
-      docs: ["spark.cheat_sheets", "docs"]
+      docs: ["spark.cheat_sheets", "docs"],
+      credo: "credo --strict"
     ]
   end
 
