@@ -16,7 +16,7 @@ defmodule AshOps.Task.Get do
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
          cfg <- Map.put(cfg, :actor, actor),
          {:ok, record} <- load_record(task, cfg),
-         {:ok, output} <- serialise_record(record, task, cfg) do
+         {:ok, output} <- serialise_record(record, task.resource, cfg) do
       Mix.shell().info(output)
 
       :ok
@@ -34,7 +34,7 @@ defmodule AshOps.Task.Get do
       |> Map.put(:authorize_with, :error)
       |> Enum.to_list()
 
-    with {:ok, field} <- identity_or_pk_field(task, cfg) do
+    with {:ok, field} <- identity_or_pk_field(task.resource, cfg) do
       task.resource
       |> Query.new()
       |> Query.for_read(task.action.name)
