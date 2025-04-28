@@ -8,6 +8,25 @@ defmodule Example.Post do
   actions do
     defaults [:read, :destroy, create: :*, update: :*]
 
+    read :read_with_etag do
+      metadata :etag, :string, allow_nil?: false
+
+      prepare after_action(fn _query, records, _context ->
+                records =
+                  records
+                  |> Enum.map(fn record ->
+                    etag =
+                      record
+                      |> Map.take([:id, :title, :body, :slug, :tenant, :updated_at])
+                      |> :erlang.phash2()
+
+                    Ash.Resource.put_metadata(record, :etag, etag)
+                  end)
+
+                {:ok, records}
+              end)
+    end
+
     action :publish, :struct do
       constraints instance_of: __MODULE__
       argument :id, :uuid, public?: true, allow_nil?: false

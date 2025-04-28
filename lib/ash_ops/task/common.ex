@@ -191,6 +191,12 @@ defmodule AshOps.Task.Common do
     |> do_filter_record(record)
   end
 
+  defp include_metadata?(record, cfg) when cfg.metadata == true do
+    dbg(cfg)
+
+    [:__metadata__]
+  end
+
   defp include_metadata?(record, cfg)
        when cfg.metadata == true and map_size(record.__metadata__) > 0,
        do: [:__metadata__]

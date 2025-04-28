@@ -17,7 +17,7 @@ defmodule AshOps.Task.Destroy do
          :ok <- destroy_record(task, cfg) do
       :ok
     else
-      {:error, reason} -> handle_error(reason)
+      {:error, reason} -> handle_error({:error, reason})
     end
   end
 
