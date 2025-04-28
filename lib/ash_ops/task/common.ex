@@ -47,18 +47,46 @@ defmodule AshOps.Task.Common do
     stop()
   end
 
+  @doc "Return the filter field for the configured identity, or the primary key"
+  def identity_or_pk_field(resource, cfg)
+      when is_atom(cfg.identity) and not is_nil(cfg.identity) do
+    case Info.identity(resource, cfg.identity) do
+      %{keys: [field]} -> {:ok, field}
+      _ -> {:error, "Composite identity error"}
+    end
+  end
+
+  def identity_or_pk_field(resource, _cfg) do
+    case Info.primary_key(resource) do
+      [pk] -> {:ok, pk}
+      _ -> {:error, "Primary key error"}
+    end
+  end
+
   @doc "Serialise the record for display"
-  def serialise_record(record, task, cfg) do
-    record
-    |> filter_record(task, cfg)
-    |> format_record(cfg[:format] || :yaml)
+  def serialise_record(record, resource, cfg) do
+    data = prepare_record(record, resource, cfg)
+
+    case cfg.format do
+      :yaml ->
+        data
+        |> Ymlr.document()
+        |> case do
+          {:ok, yaml} -> {:ok, String.replace_leading(yaml, "---\n", "")}
+          {:error, reason} -> {:error, reason}
+        end
+
+      :json ->
+        data
+        |> Jason.encode(pretty: true)
+    end
   end
 
   @doc "Serialise a list of records for display"
-  def serialise_records(records, task, cfg) when cfg.format == :yaml do
+  def serialise_records(records, resource, cfg) when cfg.format == :yaml do
     with {:ok, outputs} <-
            Enum.reduce_while(records, {:ok, []}, fn record, {:ok, outputs} ->
-             case serialise_record(record, task, cfg) do
+             case serialise_record(record, resource, cfg) do
                {:ok, output} -> {:cont, {:ok, [output | outputs]}}
                {:error, reason} -> {:halt, {:error, reason}}
              end
@@ -72,50 +100,90 @@ defmodule AshOps.Task.Common do
     end
   end
 
-  def serialise_records(records, task, cfg) when cfg.format == :json do
+  def serialise_records(records, resource, cfg) when cfg.format == :json do
     records
-    |> Enum.map(&filter_record(&1, task, cfg))
+    |> Enum.map(&prepare_record(&1, resource, cfg))
     |> Jason.encode(pretty: true)
   end
 
-  def serialise_records(records, task, cfg),
-    do: serialise_records(records, task, Map.put(cfg, :format, :yaml))
+  def serialise_records(records, resource, cfg),
+    do: serialise_records(records, resource, Map.put(cfg, :format, :yaml))
 
-  @doc "Return the filter field for the configured identity, or the primary key"
-  def identity_or_pk_field(task, cfg) when is_atom(cfg.identity) and not is_nil(cfg.identity) do
-    case Info.identity(task.resource, cfg.identity) do
-      %{keys: [field]} -> {:ok, field}
-      _ -> {:error, "Composite identity error"}
-    end
-  end
-
-  def identity_or_pk_field(task, _cfg) do
-    case Info.primary_key(task.resource) do
-      [pk] -> {:ok, pk}
-      _ -> {:error, "Primary key error"}
-    end
-  end
-
-  defp format_record(record, :yaml) do
+  # Filter and format record fields, but do not encode
+  defp prepare_record(record, resource, cfg) do
     record
-    |> Map.new(fn
-      {key, nil} -> {key, "nil"}
-      {key, value} -> {key, value}
+    |> filter_record(resource, cfg)
+    |> format_record(resource, cfg)
+  end
+
+  # Apply formatting to each field of a filtered record
+  defp format_record(record, resource, cfg) do
+    Map.new(record, fn
+      {key, value} ->
+        field_info = resource |> Info.field(key)
+        {key, format_value(value, field_info, cfg)}
     end)
-    |> Ymlr.document()
-    |> case do
-      {:ok, yaml} -> {:ok, String.replace_leading(yaml, "---\n", "")}
-      {:error, reason} -> {:error, reason}
+  end
+
+  @doc """
+  Format a value given the field type info and formatting configuration options
+  """
+  def format_value(value, field_info, cfg)
+
+  # NOTE: In future, dispatch on the type, not the value to support new types
+  def format_value(value = %Ash.CiString{}, field_info, cfg) do
+    format_value(to_string(value), field_info, cfg)
+  end
+
+  def format_value(nil, _field, %{format: :yaml}) do
+    "nil"
+  end
+
+  def format_value(value, attribute = %{type: {:array, type}}, cfg) when is_list(value) do
+    inner_type = type
+    inner_constraints = attribute.constraints[:items] || []
+    inner_attribute = %{attribute | type: inner_type, constraints: inner_constraints}
+    Enum.map(value, &format_value(&1, inner_attribute, cfg))
+  end
+
+  # HasMany or ManyToMany relationships
+  def format_value(value, attribute = %{cardinality: :many}, cfg) when is_list(value) do
+    Enum.map(value, &format_value(&1, attribute, cfg))
+  end
+
+  def format_value(%struct{} = value, field_info, cfg) do
+    if Info.resource?(struct) do
+      load = cfg[:load][field_info.name] || []
+      cfg = Map.put(cfg, :load, load)
+      prepare_record(value, struct, cfg)
+    else
+      format_fallback_value(value, cfg)
     end
   end
 
-  defp format_record(record, :json) do
-    record
-    |> Jason.encode(pretty: true)
+  def format_value(value, _field_info, cfg) do
+    format_fallback_value(value, cfg)
   end
 
-  defp filter_record(record, task, cfg) do
-    task.resource
+  defp format_fallback_value(value, %{format: :json}) do
+    if Jason.Encoder.impl_for(value) do
+      value
+    else
+      "<Failed to encode>"
+    end
+  end
+
+  defp format_fallback_value(value, %{format: :yaml}) do
+    if Ymlr.Encoder.impl_for(value) do
+      value
+    else
+      "<Failed to encode>"
+    end
+  end
+
+  # Convert a record to a plain map, excluding private fields
+  defp filter_record(record, _resource, cfg) do
+    record
     |> Info.public_fields()
     |> Enum.map(& &1.name)
     |> Enum.concat(cfg[:load] || [])

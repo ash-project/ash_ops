@@ -14,7 +14,7 @@ defmodule AshOps.Task.Create do
     with {:ok, cfg} <- ArgSchema.parse(arg_schema, argv),
          {:ok, changeset} <- read_input(task, cfg),
          {:ok, record} <- create_record(changeset, task, cfg),
-         {:ok, output} <- serialise_record(record, task, cfg) do
+         {:ok, output} <- serialise_record(record, task.resource, cfg) do
       Mix.shell().info(output)
       :ok
     else
