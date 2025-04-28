@@ -131,7 +131,7 @@ defmodule AshOps.Task.Common do
   def format_value(value, field_info, cfg)
 
   # NOTE: In future, dispatch on the type, not the value to support new types
-  def format_value(value = %Ash.CiString{}, field_info, cfg) do
+  def format_value(%Ash.CiString{} = value, field_info, cfg) do
     format_value(to_string(value), field_info, cfg)
   end
 
