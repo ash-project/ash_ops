@@ -15,7 +15,7 @@ defmodule AshOps.Task.Action do
          cfg <- Map.put(cfg, :actor, actor),
          {:ok, result} <- run_action(task, cfg),
          {:ok, result} <- maybe_load(result, task, cfg),
-         {:ok, output} <- serialise_result(result, task, cfg) do
+         {:ok, output} <- serialise_result(result, cfg) do
       Mix.shell().info(output)
 
       :ok
@@ -74,12 +74,12 @@ defmodule AshOps.Task.Action do
     end
   end
 
-  defp serialise_result(result, task, cfg) do
+  defp serialise_result(result, cfg) do
     if record_or_records?(result) do
       if is_list(result) do
-        serialise_records(result, task, cfg)
+        serialise_records(result, hd(result).__struct__, cfg)
       else
-        serialise_record(result, task, cfg)
+        serialise_record(result, result.__struct__, cfg)
       end
     else
       serialise_generic_result(result, cfg)

@@ -16,7 +16,7 @@ defmodule AshOps.Task.List do
          {:ok, query} <- QueryLang.parse(task, query),
          {:ok, actor} <- load_actor(cfg[:actor], cfg[:tenant]),
          {:ok, records} <- load_records(query, task, Map.put(cfg, :actor, actor)),
-         {:ok, output} <- serialise_records(records, task, cfg) do
+         {:ok, output} <- serialise_records(records, task.resource, cfg) do
       Mix.shell().info(output)
 
       :ok

@@ -17,7 +17,7 @@ defmodule AshOps.Task.Update do
          {:ok, record} <- load_record(task, cfg),
          {:ok, changeset} <- read_input(record, task, cfg),
          {:ok, record} <- update_record(changeset, task, cfg),
-         {:ok, output} <- serialise_record(record, task, cfg) do
+         {:ok, output} <- serialise_record(record, task.resource, cfg) do
       Mix.shell().info(output)
       :ok
     else
@@ -44,7 +44,7 @@ defmodule AshOps.Task.Update do
       |> Map.put(:authorize_with, :error)
       |> Enum.to_list()
 
-    with {:ok, field} <- identity_or_pk_field(task, cfg) do
+    with {:ok, field} <- identity_or_pk_field(task.resource, cfg) do
       task.resource
       |> Query.new()
       |> Query.for_read(task.read_action.name)

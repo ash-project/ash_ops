@@ -28,7 +28,7 @@ defmodule AshOps.Task.Destroy do
       |> Map.put(:domain, task.domain)
       |> Enum.to_list()
 
-    with {:ok, field} <- identity_or_pk_field(task, cfg) do
+    with {:ok, field} <- identity_or_pk_field(task.resource, cfg) do
       task.resource
       |> Query.new()
       |> Query.filter_input(%{field => %{"eq" => cfg.positional_arguments.id}})
