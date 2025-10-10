@@ -9,6 +9,7 @@ defmodule AshOps.Entity.Update do
 
   defstruct [
     :__identifier__,
+    :__spark_metadata__,
     :action,
     :description,
     :domain,
@@ -23,6 +24,7 @@ defmodule AshOps.Entity.Update do
 
   @type t :: %__MODULE__{
           __identifier__: any,
+          __spark_metadata__: Spark.Dsl.Entity.spark_meta(),
           action: atom | Ash.Resource.Actions.Update.t(),
           arguments: [atom],
           description: nil | String.t(),

@@ -9,6 +9,7 @@ defmodule AshOps.Entity.List do
 
   defstruct [
     :__identifier__,
+    :__spark_metadata__,
     :action,
     :description,
     :domain,
@@ -22,6 +23,7 @@ defmodule AshOps.Entity.List do
 
   @type t :: %__MODULE__{
           __identifier__: any,
+          __spark_metadata__: Spark.Dsl.Entity.spark_meta(),
           action: atom | Ash.Resource.Actions.Read.t(),
           arguments: [atom],
           description: nil | String.t(),
