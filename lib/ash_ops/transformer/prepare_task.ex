@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Transformer.PrepareTask do
   @moduledoc """
   A Spark DSL transformer for all `mix_tasks` entities.

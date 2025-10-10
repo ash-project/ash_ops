@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Task.Create do
   @moduledoc """
   Provides the implementation of the `create` mix task.

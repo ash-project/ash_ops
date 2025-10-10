@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Task.ArgSchema do
   @moduledoc """
   A struct which contains information about the arguments a task expects to

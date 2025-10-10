@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Entity.Destroy do
   @moduledoc """
   The `mix_tasks.destroy` DSL entity.

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Task.Action do
   @moduledoc """
   Provides the implementation of the `action` mix task.

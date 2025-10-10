@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Entity.Create do
   @moduledoc """
   The `mix_tasks.create` DSL entity.

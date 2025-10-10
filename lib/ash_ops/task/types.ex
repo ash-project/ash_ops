@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Task.Types do
   @moduledoc """
   Custom `Spark.Options` types for casting and validating CLI arguments.

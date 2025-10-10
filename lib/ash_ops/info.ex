@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Info do
   @moduledoc """
   Auto-generated introspection for the `AshOps` extension.

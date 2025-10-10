@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.Verifier.VerifyTask do
   @moduledoc """
   A Spark DSL verifier for mix task entities.

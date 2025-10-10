@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps do
   @moduledoc """
   An extension for `Ash.Domain` that adds the ability expose resource actions as

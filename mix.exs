@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 James Harton
+#
+# SPDX-License-Identifier: MIT
+
 defmodule AshOps.MixProject do
   use Mix.Project
 
@@ -28,8 +32,12 @@ defmodule AshOps.MixProject do
       ],
       licenses: ["MIT"],
       links: %{
-        "Source" => "https://github.com/ash-project/ash_ops",
-        "Ash" => "https://www.ash-hq.org/"
+        "GitHub" => "https://github.com/ash-project/ash_ops",
+        "Changelog" => "https://github.com/ash-project/ash_ops/blob/main/CHANGELOG.md",
+        "Discord" => "https://discord.gg/HTHRaaVPUc",
+        "Website" => "https://ash-hq.org",
+        "Forum" => "https://elixirforum.com/c/elixir-framework-forums/ash-framework-forum",
+        "REUSE Compliance" => "https://api.reuse.software/info/github.com/ash-project/ash_ops"
       },
       source_url: "https://github.com/ash-project/ash_ops",
       files: ~w[lib src .formatter.exs mix.exs README* LICENSE* CHANGELOG* documentation]
@@ -45,7 +53,7 @@ defmodule AshOps.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "CHANGELOG.md", "LICENSE.md", "documentation/dsls/DSL-AshOps.md"],
+      extras: ["README.md", "CHANGELOG.md", "documentation/dsls/DSL-AshOps.md"],
       filter_modules: ~r/^Elixir\.AshOps/
     ]
   end
