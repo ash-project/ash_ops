@@ -13,6 +13,7 @@ spark_locals_without_parens = [
   destroy: 4,
   get: 3,
   get: 4,
+  identity: 1,
   list: 3,
   list: 4,
   prefix: 1,

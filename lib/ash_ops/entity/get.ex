@@ -13,6 +13,7 @@ defmodule AshOps.Entity.Get do
     :action,
     :description,
     :domain,
+    :identity,
     :name,
     :prefix,
     :resource,
@@ -28,6 +29,7 @@ defmodule AshOps.Entity.Get do
           arguments: [atom],
           description: nil | String.t(),
           domain: module,
+          identity: nil | false | atom,
           name: atom,
           prefix: atom,
           resource: module,
@@ -81,6 +83,12 @@ defmodule AshOps.Entity.Get do
           type: :string,
           required: false,
           doc: "Documentation to be displayed in the mix task's help section"
+        ],
+        identity: [
+          type: {:or, [:atom, {:literal, false}]},
+          required: false,
+          doc:
+            "The identity to use for looking up the record. Use `false` to skip adding identity arguments."
         ],
         name: [
           type: :atom,
