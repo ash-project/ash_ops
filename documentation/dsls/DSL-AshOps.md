@@ -185,6 +185,7 @@ status: ok
 |------|------|---------|------|
 | [`arguments`](#mix_tasks-destroy-arguments){: #mix_tasks-destroy-arguments } | `atom \| list(atom)` | `[]` | A list of action arguments which should be taken as positional arguments on the command line |
 | [`description`](#mix_tasks-destroy-description){: #mix_tasks-destroy-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
+| [`identity`](#mix_tasks-destroy-identity){: #mix_tasks-destroy-identity } | `atom \| false` |  | The identity to use for looking up the record. Use `false` to skip adding identity arguments. |
 | [`prefix`](#mix_tasks-destroy-prefix){: #mix_tasks-destroy-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first ".").  Defaults to the `otp_app` setting of the domain |
 | [`read_action`](#mix_tasks-destroy-read_action){: #mix_tasks-destroy-read_action } | `atom` |  | The read action to use to query for matching records to destroy. Defaults to the primary read action. |
 
@@ -241,6 +242,7 @@ body: This is the example blog post
 |------|------|---------|------|
 | [`arguments`](#mix_tasks-get-arguments){: #mix_tasks-get-arguments } | `atom \| list(atom)` | `[]` | A list of action arguments which should be taken as positional arguments on the command line |
 | [`description`](#mix_tasks-get-description){: #mix_tasks-get-description } | `String.t` |  | Documentation to be displayed in the mix task's help section |
+| [`identity`](#mix_tasks-get-identity){: #mix_tasks-get-identity } | `atom \| false` |  | The identity to use for looking up the record. Use `false` to skip adding identity arguments. |
 | [`prefix`](#mix_tasks-get-prefix){: #mix_tasks-get-prefix } | `atom` |  | The prefix to use for the mix task name (ie the part before the first ".").  Defaults to the `otp_app` setting of the domain |
 
 

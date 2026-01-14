@@ -25,7 +25,9 @@ defmodule AshOps.Verifier.VerifyTask do
   end
 
   defp verify_entity(task, dsl) do
-    verify_arguments(task, dsl)
+    with :ok <- verify_arguments(task, dsl) do
+      verify_identity(task, dsl)
+    end
   end
 
   defp verify_arguments(task, _dsl) when task.arguments == [], do: :ok
@@ -70,4 +72,32 @@ defmodule AshOps.Verifier.VerifyTask do
          )}
     end
   end
+
+  defp verify_identity(%{identity: nil}, _dsl), do: :ok
+  defp verify_identity(%{identity: false}, _dsl), do: :ok
+
+  defp verify_identity(%{identity: identity} = task, dsl) when is_atom(identity) do
+    identities = Ash.Resource.Info.identities(task.resource)
+
+    case Enum.find(identities, &(&1.name == identity)) do
+      nil ->
+        identity_names = Enum.map(identities, & &1.name)
+
+        {:error,
+         DslError.exception(
+           module: get_persisted(dsl, :module),
+           path: [:mix_tasks, task.type, task.name, :identity],
+           message: """
+           The resource `#{inspect(task.resource)}` does not have an identity named `#{inspect(identity)}`.
+
+           #{if Enum.empty?(identity_names), do: "This resource has no identities defined.", else: "Available identities: #{inspect(identity_names)}"}
+           """
+         )}
+
+      _identity_info ->
+        :ok
+    end
+  end
+
+  defp verify_identity(_task, _dsl), do: :ok
 end

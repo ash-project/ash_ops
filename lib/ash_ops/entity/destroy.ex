@@ -13,6 +13,7 @@ defmodule AshOps.Entity.Destroy do
     :action,
     :description,
     :domain,
+    :identity,
     :name,
     :prefix,
     :read_action,
@@ -29,6 +30,7 @@ defmodule AshOps.Entity.Destroy do
           arguments: [atom],
           description: nil | String.t(),
           domain: module,
+          identity: nil | false | atom,
           name: atom,
           prefix: atom,
           read_action: nil | atom | Ash.Resource.Actions.Read.t(),
@@ -82,6 +84,12 @@ defmodule AshOps.Entity.Destroy do
           type: :string,
           required: false,
           doc: "Documentation to be displayed in the mix task's help section"
+        ],
+        identity: [
+          type: {:or, [:atom, {:literal, false}]},
+          required: false,
+          doc:
+            "The identity to use for looking up the record. Use `false` to skip adding identity arguments."
         ],
         name: [
           type: :atom,

@@ -27,3 +27,4 @@ ash_ops-*.tar
 /tmp/
 
 .elixir_ls
+.claude/
