@@ -88,19 +88,20 @@ defmodule AshOps.Task.Common do
 
   @doc "Serialise a list of records for display"
   def serialise_records(records, resource, cfg) when cfg.format == :yaml do
-    with {:ok, outputs} <-
-           Enum.reduce_while(records, {:ok, []}, fn record, {:ok, outputs} ->
-             case serialise_record(record, resource, cfg) do
-               {:ok, output} -> {:cont, {:ok, [output | outputs]}}
-               {:error, reason} -> {:halt, {:error, reason}}
-             end
-           end) do
-      outputs =
-        outputs
-        |> Enum.reverse()
-        |> Enum.join("---\n")
+    result =
+      Enum.reduce_while(records, {:ok, []}, fn record, {:ok, outputs} ->
+        case serialise_record(record, resource, cfg) do
+          {:ok, output} -> {:cont, {:ok, [output | outputs]}}
+          {:error, reason} -> {:halt, {:error, reason}}
+        end
+      end)
 
-      {:ok, outputs}
+    case result do
+      {:ok, outputs} ->
+        {:ok, outputs |> Enum.reverse() |> Enum.join("---\n")}
+
+      {:error, _} = error ->
+        error
     end
   end
 
