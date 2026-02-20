@@ -202,14 +202,17 @@ defmodule AshOps.QueryLang do
   defp op_to_module(op), do: {:error, "Unknown infix operator `#{inspect(op)}`"}
 
   defp map_while(input, mapper) do
-    with {:ok, result} <-
-           Enum.reduce_while(input, {:ok, []}, fn element, {:ok, result} ->
-             case mapper.(element) do
-               {:ok, element} -> {:cont, {:ok, [element | result]}}
-               {:error, reason} -> {:halt, {:error, reason}}
-             end
-           end) do
-      {:ok, Enum.reverse(result)}
+    result =
+      Enum.reduce_while(input, {:ok, []}, fn element, {:ok, acc} ->
+        case mapper.(element) do
+          {:ok, element} -> {:cont, {:ok, [element | acc]}}
+          {:error, reason} -> {:halt, {:error, reason}}
+        end
+      end)
+
+    case result do
+      {:ok, elements} -> {:ok, Enum.reverse(elements)}
+      {:error, _} = error -> error
     end
   end
 end
