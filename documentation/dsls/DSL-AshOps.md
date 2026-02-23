@@ -51,7 +51,7 @@ Defining the following `action` in your domain:
 
 ```elixir
 mix_tasks do
-action Post, :publish_post, :publish, arguments: [:id, :platform]
+  action Post, :publish_post, :publish, arguments: [:id, :platform]
 end
 ```
 
@@ -104,7 +104,7 @@ Defining the following `create` in your domain:
 
 ```elixir
 mix_tasks do
-create Post, :create_post, :create
+  create Post, :create_post, :create
 end
 ```
 
@@ -156,7 +156,7 @@ Defining the following `destroy` in your domain:
 
 ```elixir
 mix_tasks do
-destroy Post, :destroy_post, :destroy
+  destroy Post, :destroy_post, :destroy
 end
 ```
 
@@ -212,7 +212,7 @@ Defining the following `get` in your domain:
 
 ```elixir
 mix_tasks do
-get Post, :get_post, :read
+  get Post, :get_post, :read
 end
 ```
 
@@ -267,7 +267,7 @@ Define the following `list` in your domain:application
 
 ```elixir
 mix_tasks do
-list Post, :list_posts, :read
+  list Post, :list_posts, :read
 end
 ```
 
@@ -320,7 +320,7 @@ Defining the following `update` in your domain:
 
 ```elixir
 mix_tasks do
-update Post, :update_post, :update
+  update Post, :update_post, :update
 end
 ```
 
