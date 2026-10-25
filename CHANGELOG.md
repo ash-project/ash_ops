@@ -11,6 +11,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## v0.3.0 (2026-10-25)
+
+
+
+
+### Features:
+
+* add `identity` option to get and destroy tasks (#93) by James Harton
+
 ## v0.2.4 (2025-04-15)
 
 
