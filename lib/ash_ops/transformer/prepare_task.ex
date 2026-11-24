@@ -190,6 +190,8 @@ defmodule AshOps.Transformer.PrepareTask do
     {:ok, %{task | task_name: "#{task.prefix}.#{domain}.#{task.name}"}}
   end
 
+  # Module names come from the compile-time DSL, not runtime input.
+  # sobelow_skip ["DOS.ModuleConcat"]
   defp gen_task(task, dsl) do
     mix_task_module_name =
       task.task_name

@@ -4,7 +4,7 @@
 
 [
   tools: [
-    {:sobelow, "mix sobelow -i Config.HTTPS --exit"},
+    {:sobelow, "mix sobelow -i Config.HTTPS --skip --exit"},
     {:spark_formatter, "mix spark.formatter --check"},
     {:spark_cheat_sheets, "mix spark.cheat_sheets --check"},
     {:reuse, command: ["pipx", "run", "reuse", "lint", "-q"]}
